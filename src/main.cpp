@@ -3,9 +3,19 @@
 #include <Arduino.h>
 #include <WiFi.h>
 
+#include <ArduinoMqttClient.h>
+
 static const std::string kRoomName = "balkon";
 static const std::string kWifiSsid = "";
 static const std::string kWifiPassword = "";
+
+static const std::string kHomeAssistantIp = "192.168.0.87";
+static const uint16_t kMqttPort = 1883;
+static const std::string kMqttUser = "mqtt_user";
+static const std::string kMqttPassword = "mgs237";
+
+WiFiClient wifiClient;
+MqttClient mqttClient(wifiClient);
 
 void blinkError(size_t seconds) {
   for (size_t i = 0; i < seconds * 2; ++i) {
@@ -38,36 +48,37 @@ void setup() {
     Serial.println("Connection Failed! Rebooting...");
     blinkError(5);
     ESP.restart();
+    Serial.println("restarting");
+  }
+
+  IPAddress ha_ip;
+  ha_ip.fromString(kHomeAssistantIp.c_str());
+
+  mqttClient.setId(kRoomName.c_str());
+  mqttClient.setUsernamePassword(kMqttUser.c_str(), kMqttPassword.c_str());
+
+  if (!mqttClient.connect(ha_ip, kMqttPort)) {
+    Serial.print("MQTT connection failed! Error code = ");
+    Serial.println(mqttClient.connectError());
+    blinkError(5);
+    ESP.restart();
+    Serial.println("restarting");
   }
 }
 
-
-/*
-void setup() {
-  App.set_name(kRoomName);
-
-  App.init_log();
-
-  auto* wifi = App.init_wifi(kWifiSsid, kWifiPassword);
-  // wifi->set_use_address("192.168.0.11");
-  // wifi->set_power_save_mode(WiFiPowerSaveMode::WIFI_POWER_SAVE_HIGH);
-
-  App.init_mqtt("192.168.0.87", "mqtt_user", "mgs237");
-
-  App.make_sht3xd_sensor(kRoomName + " Temperature", kRoomName + " Humidity", 10);
-  App.make_status_binary_sensor(kRoomName + " Node Status");
-  App.make_restart_switch(kRoomName + " Restart");
-
-  App.setup();
-}
-*/
-
 void loop() {
   Serial.println("I am working");
+
+  mqttClient.poll();
+
+  mqttClient.beginMessage("home/balkon/sensor/temperature");
+  mqttClient.print("39.2");
+  mqttClient.endMessage();
+
+  Serial.println("Sent message to MQTT");
+
   digitalWrite(LED_BUILTIN, HIGH);
   delay(500);
   digitalWrite(LED_BUILTIN, LOW);
-  delay(2000);
-
-  // App.loop();
+  delay(500);
 }
