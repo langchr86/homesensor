@@ -71,7 +71,7 @@ void loop() {
 
   mqttClient.poll();
 
-  mqttClient.beginMessage("home/balkon/sensor/temperature");
+  mqttClient.beginMessage("home/balkon/temperature", true);
   mqttClient.print("39.2");
   mqttClient.endMessage();
 
