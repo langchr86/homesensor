@@ -5,6 +5,8 @@
 
 #include <ArduinoMqttClient.h>
 
+#include "auto_discovery.h"
+
 static const std::string kRoomName = "balkon";
 static const std::string kWifiSsid = "";
 static const std::string kWifiPassword = "";
@@ -16,6 +18,8 @@ static const std::string kMqttPassword = "mgs237";
 
 WiFiClient wifiClient;
 MqttClient mqttClient(wifiClient);
+
+AutoDiscovery temperature_sensor;
 
 void blinkError(size_t seconds) {
   for (size_t i = 0; i < seconds * 2; ++i) {
@@ -64,6 +68,11 @@ void setup() {
     ESP.restart();
     Serial.println("restarting");
   }
+
+  temperature_sensor.SetNameAndUniqueId("Balkon Temperature", "balkon_temperature");
+  temperature_sensor.SetExpireTimeout(std::chrono::seconds(120));
+  temperature_sensor.SetDeviceInfo("balkon");
+  temperature_sensor.SetSensorData(SensorDeviceClass::kTemperature, "°C");
 }
 
 void loop() {
@@ -71,11 +80,30 @@ void loop() {
 
   mqttClient.poll();
 
-  mqttClient.beginMessage("home/balkon/temperature", true);
-  mqttClient.print("39.2");
+
+  const auto config_topic = temperature_sensor.GetConfigTopic();
+  const auto config_payload = temperature_sensor.GetConfigString();
+  mqttClient.beginMessage(config_topic.c_str(), true);
+  mqttClient.print(config_payload.c_str());
   mqttClient.endMessage();
 
-  Serial.println("Sent message to MQTT");
+  Serial.print("Sent config message to: ");
+  Serial.println(config_topic.c_str());
+  Serial.println(config_payload.c_str());
+  Serial.println("-------------------");
+
+
+  const auto state_topic = temperature_sensor.GetStateTopic();
+  const std::string state_payload = "11.1";
+  mqttClient.beginMessage(state_topic.c_str(), true);
+  mqttClient.print(state_payload.c_str());
+  mqttClient.endMessage();
+
+  Serial.println("Sent state message to: ");
+  Serial.println(state_topic.c_str());
+  Serial.println(state_payload.c_str());
+  Serial.println("-------------------");
+
 
   digitalWrite(LED_BUILTIN, HIGH);
   delay(500);
