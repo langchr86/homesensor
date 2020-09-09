@@ -26,5 +26,5 @@ public:
 private:
   std::string config_topic_;
   std::string state_topic_;
-  StaticJsonDocument<JSON_OBJECT_SIZE(32)> root_;
+  StaticJsonDocument<JSON_OBJECT_SIZE(128)> root_;
 };

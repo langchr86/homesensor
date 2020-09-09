@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
 
+#define MQTT_MAX_PACKET_SIZE 256  // needs to be directly set in the library files
 #include <ArduinoMqttClient.h>
 
 #include "auto_discovery.h"
@@ -11,10 +12,10 @@ static const std::string kRoomName = "balkon";
 static const std::string kWifiSsid = "";
 static const std::string kWifiPassword = "";
 
-static const std::string kHomeAssistantIp = "192.168.0.87";
+static const std::string kHomeAssistantIp = "192.168.0.25";
 static const uint16_t kMqttPort = 1883;
-static const std::string kMqttUser = "mqtt_user";
-static const std::string kMqttPassword = "mgs237";
+static const std::string kMqttUser = "";
+static const std::string kMqttPassword = "";
 
 WiFiClient wifiClient;
 MqttClient mqttClient(wifiClient);
@@ -69,8 +70,8 @@ void setup() {
     Serial.println("restarting");
   }
 
-  temperature_sensor.SetNameAndUniqueId("Balkon Temperature", "balkon_temperature");
-  temperature_sensor.SetExpireTimeout(std::chrono::seconds(120));
+  temperature_sensor.SetNameAndUniqueId("Balkon Temperature", "balkon");
+  temperature_sensor.SetExpireTimeout(std::chrono::seconds(3));
   temperature_sensor.SetDeviceInfo("balkon");
   temperature_sensor.SetSensorData(SensorDeviceClass::kTemperature, "°C");
 }
@@ -83,7 +84,7 @@ void loop() {
 
   const auto config_topic = temperature_sensor.GetConfigTopic();
   const auto config_payload = temperature_sensor.GetConfigString();
-  mqttClient.beginMessage(config_topic.c_str(), true);
+  mqttClient.beginMessage(config_topic.c_str(), false);
   mqttClient.print(config_payload.c_str());
   mqttClient.endMessage();
 
@@ -95,7 +96,7 @@ void loop() {
 
   const auto state_topic = temperature_sensor.GetStateTopic();
   const std::string state_payload = "11.1";
-  mqttClient.beginMessage(state_topic.c_str(), true);
+  mqttClient.beginMessage(state_topic.c_str(), false);
   mqttClient.print(state_payload.c_str());
   mqttClient.endMessage();
 
