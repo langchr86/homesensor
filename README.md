@@ -9,4 +9,15 @@ mqtt:
   discovery_prefix: homeassistant
 ~~~~~~
 
-Not needed because acticated in integration setup of mqtt
+Not needed because activated in integration setup of mqtt
+
+
+TODO:
+
+* float precision
+* replace MQTT library
+* battery level notification
+* depp sleep
+* real sensor integration
+* linear calibration
+* sensor power save modes

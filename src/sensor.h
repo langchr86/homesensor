@@ -9,7 +9,7 @@
 class Sensor
 {
 public:
-    Sensor(const String &readable_name, const String &unique_id, SensorDeviceClass device_class, const String &unit_of_measurement);
+    Sensor(const String &readable_name, const String &unique_id, SensorDeviceClass device_class, const String &unit_of_measurement = "", const String &icon = "");
 
     void SetExpireTimeout(const std::chrono::seconds &timeout);
     void SetValue(float value);
@@ -28,6 +28,7 @@ private:
     String unique_id_;
     SensorDeviceClass device_class_;
     String unit_of_measurement_;
+    String icon_;
 
     std::chrono::seconds expire_timeout_;
     float value_;

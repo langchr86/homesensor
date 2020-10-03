@@ -4,9 +4,9 @@
 
 static constexpr char kDeviceJsonObjectName[] = "device";
 
-Sensor::Sensor(const String &readable_name, const String &unique_id, SensorDeviceClass device_class, const String &unit_of_measurement)
+Sensor::Sensor(const String &readable_name, const String &unique_id, SensorDeviceClass device_class, const String &unit_of_measurement, const String &icon)
     : readable_name_(readable_name), unique_id_(unique_id),
-      device_class_(device_class), unit_of_measurement_(unit_of_measurement), expire_timeout_(1), value_(0) {}
+      device_class_(device_class), unit_of_measurement_(unit_of_measurement), icon_(icon), expire_timeout_(1), value_(0) {}
 
 void Sensor::SetExpireTimeout(const std::chrono::seconds &timeout)
 {
@@ -20,16 +20,25 @@ void Sensor::SetValue(float value)
 
 String Sensor::GetConfigPayload() const
 {
-    StaticJsonDocument<JSON_OBJECT_SIZE(32)> json;
+    StaticJsonDocument<JSON_OBJECT_SIZE(64)> json;
 
     json["name"] = device_readable_name_ + " " + readable_name_;
     json["unique_id"] = device_unique_id_ + "_" + unique_id_;
     json["state_topic"] = device_state_topic_;
-
-    json["device_class"] = ToString(device_class_);
-    json["unit_of_measurement"] = unit_of_measurement_;
     json["value_template"] = "{{ value_json." + unique_id_ + " }}";
-    // TODO(clang): json["icon"] = "";
+
+    if (device_class_ != SensorDeviceClass::kNone)
+    {
+        json["device_class"] = ToString(device_class_);
+    }
+    if (unit_of_measurement_.isEmpty() == false)
+    {
+        json["unit_of_measurement"] = unit_of_measurement_;
+    }
+    if (icon_.isEmpty() == false)
+    {
+        json["icon"] = icon_;
+    }
 
     json["expire_after"] = static_cast<uint32_t>(expire_timeout_.count());
 
