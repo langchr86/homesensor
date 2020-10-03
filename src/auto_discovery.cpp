@@ -13,13 +13,13 @@ void AutoDiscovery::SetUniqueName(const std::string &name)
 
 void AutoDiscovery::SetNameAndUniqueId(const std::string &name, const std::string &unique_id)
 {
-    root_["name"] = name;
-    root_["unique_id"] = unique_id;
+    config_json_["name"] = name;
+    config_json_["unique_id"] = unique_id;
 
     config_topic_ = kTopicBase + unique_id + "/config";
     state_topic_ = kTopicBase + unique_id + "/state";
 
-    root_["state_topic"] = state_topic_;
+    config_json_["state_topic"] = state_topic_;
 }
 
 void AutoDiscovery::SetAvailablitiy()
@@ -46,7 +46,7 @@ void AutoDiscovery::SetAvailablitiy()
 
 void AutoDiscovery::SetDeviceInfo(const std::string &unique_device_id)
 {
-    auto device_info = root_.createNestedObject("device");
+    auto device_info = config_json_.createNestedObject("device");
     device_info["identifiers"] = unique_device_id;
     device_info["name"] = unique_device_id;
     device_info["model"] = "firebeetle32";
@@ -55,14 +55,23 @@ void AutoDiscovery::SetDeviceInfo(const std::string &unique_device_id)
 
 void AutoDiscovery::SetSensorData(SensorDeviceClass device_class, const std::string &unit_of_measurement)
 {
-    root_["device_class"] = std::to_string(device_class);
-    root_["unit_of_measurement"] = unit_of_measurement;
+    device_class_ = device_class;
+    const auto class_string = std::to_string(device_class_);
+    config_json_["device_class"] = class_string;
+    config_json_["unit_of_measurement"] = unit_of_measurement;
+    config_json_["value_template"] = "{{ value_json." + class_string + " }}";
     // root_["icon"] = "";
 }
 
 void AutoDiscovery::SetExpireTimeout(const std::chrono::seconds &timeout)
 {
-    root_["expire_after"] = static_cast<uint32_t>(timeout.count());
+    config_json_["expire_after"] = static_cast<uint32_t>(timeout.count());
+}
+
+void AutoDiscovery::SetSensorValue(float value)
+{
+    const auto value_name = std::to_string(device_class_);
+    state_json_[value_name] = value;
 }
 
 std::string AutoDiscovery::GetConfigTopic() const
@@ -78,6 +87,13 @@ std::string AutoDiscovery::GetStateTopic() const
 std::string AutoDiscovery::GetConfigString() const
 {
     std::string output;
-    serializeJson(root_, output);
+    serializeJson(config_json_, output);
+    return output;
+}
+
+std::string AutoDiscovery::GetStateString() const
+{
+    std::string output;
+    serializeJson(state_json_, output);
     return output;
 }

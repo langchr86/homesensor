@@ -93,9 +93,9 @@ void loop() {
   Serial.println(config_payload.c_str());
   Serial.println("-------------------");
 
-
+  temperature_sensor.SetSensorValue(9.9);
   const auto state_topic = temperature_sensor.GetStateTopic();
-  const std::string state_payload = "11.1";
+  const auto state_payload = temperature_sensor.GetStateString();
   mqttClient.beginMessage(state_topic.c_str(), false);
   mqttClient.print(state_payload.c_str());
   mqttClient.endMessage();
