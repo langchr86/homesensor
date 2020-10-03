@@ -12,7 +12,7 @@ public:
     Sensor(const String &readable_name, const String &unique_id, SensorDeviceClass device_class, const String &unit_of_measurement = "", const String &icon = "");
 
     void SetExpireTimeout(const std::chrono::seconds &timeout);
-    void SetValue(float value);
+    void SetValue(float value, size_t decimal_precision = 1);
 
     String GetConfigPayload() const;
 
@@ -31,7 +31,7 @@ private:
     String icon_;
 
     std::chrono::seconds expire_timeout_;
-    float value_;
+    String value_;
 
     String device_readable_name_;
     String device_unique_id_;

@@ -13,9 +13,9 @@ void Sensor::SetExpireTimeout(const std::chrono::seconds &timeout)
     expire_timeout_ = timeout;
 }
 
-void Sensor::SetValue(float value)
+void Sensor::SetValue(float value, size_t decimal_precision)
 {
-    value_ = value;
+    value_ = String(value, decimal_precision);
 }
 
 String Sensor::GetConfigPayload() const
@@ -60,7 +60,7 @@ String Sensor::GetUniqueId() const
 
 String Sensor::GetStateValue() const
 {
-    return String() + value_;
+    return value_;
 }
 
 void Sensor::SetDeviceInfo(const String &readable_name, const String &unique_id,

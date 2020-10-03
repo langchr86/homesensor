@@ -75,16 +75,19 @@ void setup()
   }
 
   const std::chrono::seconds expire_timeout(3);
-  auto temperature_sensor = std::make_shared<Sensor>("Temperature", "temperature", SensorDeviceClass::kTemperature, "°C");
+  auto temperature_sensor = std::make_shared<Sensor>("Temperatur", "temperature", SensorDeviceClass::kTemperature, "°C");
   temperature_sensor->SetExpireTimeout(expire_timeout);
+  temperature_sensor->SetValue(23.3),
   device.AddSensor(temperature_sensor);
 
-  auto humidity_sensor = std::make_shared<Sensor>("Humidity", "humidity", SensorDeviceClass::kHumidity, "%");
+  auto humidity_sensor = std::make_shared<Sensor>("Feuchtigkeit", "humidity", SensorDeviceClass::kHumidity, "%");
   humidity_sensor->SetExpireTimeout(expire_timeout);
+  humidity_sensor->SetValue(55.5);
   device.AddSensor(humidity_sensor);
 
   auto co2_sensor = std::make_shared<Sensor>("CO2", "co2", SensorDeviceClass::kNone, "ppm", "mdi:molecule-co2");
   co2_sensor->SetExpireTimeout(expire_timeout);
+  co2_sensor->SetValue(444, 0);
   device.AddSensor(co2_sensor);
 }
 

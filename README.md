@@ -14,10 +14,9 @@ Not needed because activated in integration setup of mqtt
 
 TODO:
 
-* float precision
 * replace MQTT library
 * battery level notification
-* depp sleep
+* deep sleep
 * real sensor integration
 * linear calibration
 * sensor power save modes
