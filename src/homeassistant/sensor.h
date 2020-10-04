@@ -4,7 +4,7 @@
 
 #include <Arduino.h>
 
-#include "sensor_device_class.h"
+#include "homeassistant/sensor_device_class.h"
 
 class Sensor
 {

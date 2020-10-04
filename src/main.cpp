@@ -5,7 +5,7 @@
 
 #include <PubSubClient.h>
 
-#include "sensor_device.h"
+#include "homeassistant/sensor_device.h"
 
 static constexpr char kWifiSsid[] = "";
 static constexpr char kWifiPassword[] = "";

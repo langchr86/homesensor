@@ -5,9 +5,9 @@
 
 #include <Arduino.h>
 
-#include "mqtt_message.h"
-#include "sensor.h"
-#include "sensor_device_class.h"
+#include "communication/mqtt_message.h"
+#include "homeassistant/sensor.h"
+#include "homeassistant/sensor_device_class.h"
 
 class SensorDevice
 {
