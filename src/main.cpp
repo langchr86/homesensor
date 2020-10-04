@@ -1,5 +1,4 @@
 #include <chrono>
-#include <memory>
 
 #include <Arduino.h>
 #include <WiFi.h>
@@ -7,7 +6,7 @@
 
 #include <PubSubClient.h>
 
-#include "homeassistant/sensor_device.h"
+#include "sensors/shtc3.h"
 
 static constexpr size_t kWireSpeedHz = 100000;
 static constexpr size_t kSerialSpeedBaud = 115200;
@@ -167,20 +166,12 @@ void setup()
   serial->println("Basic MQTT setup finished");
 
   const std::chrono::seconds expire_timeout(3 * kReadOutInterval);
-  SensorDevice device(kSensorName, kSensorId, "firebeetle32", "espressif");
-
-  auto temperature_sensor = std::make_shared<Sensor>("Temperatur", "temperature", SensorDeviceClass::kTemperature, "°C");
-  temperature_sensor->SetExpireTimeout(expire_timeout);
-  device.AddSensor(temperature_sensor);
-
-  auto humidity_sensor = std::make_shared<Sensor>("Feuchtigkeit", "humidity", SensorDeviceClass::kHumidity, "%");
-  humidity_sensor->SetExpireTimeout(expire_timeout);
-  device.AddSensor(humidity_sensor);
-
-  auto co2_sensor = std::make_shared<Sensor>("CO2", "co2", SensorDeviceClass::kNone, "ppm", "mdi:molecule-co2");
-  co2_sensor->SetExpireTimeout(expire_timeout);
-  device.AddSensor(co2_sensor);
-
+  Shtc3 sensor(serial, wire, mqtt, kSensorName, kSensorId, expire_timeout);
+  if (sensor.InitHardware() == false)
+  {
+    serial->println("Failed to initialize sensor hardware");
+    Reboot(serial);
+  }
   serial->println("Sensor setup finished");
 
   if (ConnectWifiAndMqtt(serial, wifi, mqtt) == false)
@@ -189,18 +180,10 @@ void setup()
     Reboot(serial);
   }
 
-  for (const auto &message : device.GetAllConfigMessages())
+  if (sensor.SendHomeassistantConfig() == false)
   {
-    if (mqttClient.publish(message.GetTopic(), message.GetPayload()) == false)
-    {
-      serial->println("Failed to send initial HA config messages");
-      Reboot(serial);
-    }
-
-    serial->print("Sent config message to: ");
-    serial->println(message.GetTopic());
-    serial->println(message.GetPayload());
-    serial->println("-------------------");
+    serial->println("Failed to send initial HA config messages");
+    Reboot(serial);
   }
 
   DisconnectWifiAndMqtt(serial, wifi, mqtt);
@@ -217,23 +200,21 @@ void setup()
       continue;
     }
 
-    temperature_sensor->SetValue(23.3);
-    humidity_sensor->SetValue(55.5);
-    co2_sensor->SetValue(444, 0);
-
-    const auto message = device.GetStateMessage();
-    mqttClient.publish(message.GetTopic(), message.GetPayload());
-
-    serial->print("Sent state message to: ");
-    serial->println(message.GetTopic());
-    serial->println(message.GetPayload());
-    serial->println("-------------------");
+    if (sensor.Loop() == false) {
+      FlashErrorLED();
+      DisconnectWifiAndMqtt(serial, wifi, mqtt);
+      continue;
+    }
 
     DisconnectWifiAndMqtt(serial, wifi, mqtt);
-
     delay(std::chrono::duration_cast<std::chrono::milliseconds>(kReadOutInterval).count());
   }
 }
 
 // we use only setup() function
 void loop() {}
+
+// TODO(clang)
+// auto co2_sensor = std::make_shared<Sensor>("CO2", "co2", SensorDeviceClass::kNone, "ppm", "mdi:molecule-co2");
+// co2_sensor->SetExpireTimeout(expire_timeout);
+// device.AddSensor(co2_sensor);

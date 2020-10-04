@@ -14,6 +14,7 @@ Not needed because activated in integration setup of mqtt
 
 TODO:
 
+* add sensor base class
 * allow to disable serial debugging?
 * battery level notification
 * deep sleep
