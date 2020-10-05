@@ -12,6 +12,14 @@ Shtc3::Shtc3(HardwareSerial *logger, TwoWire *wire, PubSubClient *mqtt, const ch
     ha_humidity_ = std::make_shared<Sensor>("Feuchtigkeit", "humidity", SensorDeviceClass::kHumidity, "%");
     ha_humidity_->SetExpireTimeout(expire_timeout);
     ha_device_->AddSensor(ha_humidity_);
+
+    ha_voltage_ = std::make_shared<Sensor>("Akkuspannung", "voltage", SensorDeviceClass::kNone, "V", "mdi:battery-heart-variant");
+    ha_voltage_->SetExpireTimeout(expire_timeout);
+    ha_device_->AddSensor(ha_voltage_);
+
+    ha_battery_ = std::make_shared<Sensor>("Akkukapazität", "capacity", SensorDeviceClass::kBattery, "%");
+    ha_battery_->SetExpireTimeout(expire_timeout);
+    ha_device_->AddSensor(ha_battery_);
 }
 
 bool Shtc3::InitHardware()
@@ -86,7 +94,7 @@ bool Shtc3::Loop()
     }
 
     ha_temperature_->SetValue(device_.toDegC());
-    ha_humidity_->SetValue(device_.toPercent());
+    ha_humidity_->SetValue(device_.toPercent(), 0);
 
     const auto message = ha_device_->GetStateMessage();
     if (mqtt_->publish(message.GetTopic(), message.GetPayload()) == false)
@@ -101,6 +109,20 @@ bool Shtc3::Loop()
     serial_->println("-------------------");
 
     return true;
+}
+
+void Shtc3::SetBatteryVoltage(float voltage)
+{
+    ha_voltage_->SetValue(voltage, 2);
+
+    auto high = 4.1;
+    auto low = 3.5;
+    auto sum = ((voltage - low) / (high - low)) * 100.0;
+    if (round(sum) >= 100)
+    {
+        sum = 100.0; // if greater than 100% then keep it there.
+    }
+    ha_battery_->SetValue(sum, 0);
 }
 
 bool Shtc3::Update()

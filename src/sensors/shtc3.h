@@ -20,6 +20,8 @@ public:
     bool SendHomeassistantConfig();
     bool Loop();
 
+    void SetBatteryVoltage(float voltage);
+
 private:
     bool Update();
 
@@ -34,4 +36,6 @@ private:
     std::shared_ptr<SensorDevice> ha_device_;
     std::shared_ptr<Sensor> ha_temperature_;
     std::shared_ptr<Sensor> ha_humidity_;
+    std::shared_ptr<Sensor> ha_voltage_;
+    std::shared_ptr<Sensor> ha_battery_;
 };

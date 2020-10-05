@@ -189,6 +189,17 @@ void setup()
   DisconnectWifiAndMqtt(serial, wifi, mqtt);
   serial->println("Initial HA config messages sent");
 
+  float voltage_divider_factor = 2.0;
+  float ADC_max_voltage = 3.6;    // no clue why this works. everyone speaks about 3.3V reference
+  float adc = analogRead(A0);
+  float voltage = adc / 4095.0 * ADC_max_voltage * voltage_divider_factor;
+  serial->print("ADC readout: ");
+  serial->print(adc);
+  serial->print(" = ");
+  serial->print(voltage);
+  serial->println("V");
+  sensor.SetBatteryVoltage(voltage);
+
   serial->println("Finished basic setup. Starting readout interval");
 
   // === readout loop ====================================================================
