@@ -13,7 +13,7 @@ static constexpr size_t kSerialSpeedBaud = 115200;
 
 static constexpr char kSensorName[] = "Balkon";
 static constexpr char kSensorId[] = "balkon";
-static constexpr auto kReadOutInterval = std::chrono::seconds(5);
+static constexpr auto kReadOutInterval = std::chrono::seconds(10);
 
 static constexpr char kWifiSsid[] = "";
 static constexpr char kWifiPassword[] = "";
@@ -200,14 +200,17 @@ void setup()
       continue;
     }
 
-    if (sensor.Loop() == false) {
+    if (sensor.Loop() == false)
+    {
       FlashErrorLED();
       DisconnectWifiAndMqtt(serial, wifi, mqtt);
       continue;
     }
 
     DisconnectWifiAndMqtt(serial, wifi, mqtt);
-    delay(std::chrono::duration_cast<std::chrono::milliseconds>(kReadOutInterval).count());
+
+    serial->println("going to deep sleep");
+    esp_deep_sleep(std::chrono::duration_cast<std::chrono::microseconds>(kReadOutInterval).count());
   }
 }
 
