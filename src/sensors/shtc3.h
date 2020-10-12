@@ -11,16 +11,15 @@
 #include <SparkFun_SHTC3.h>
 
 #include "homeassistant/sensor_device.h"
+#include "sensors/forward_declarations.h"
+#include "sensors/sensor_base.h"
 
-class Shtc3
+class Shtc3 : public SensorBase
 {
 public:
-    Shtc3(HardwareSerial *serial, TwoWire *wire, PubSubClient *mqtt, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout);
+    Shtc3(HardwareSerial *serial, ADC *adc, TwoWire *wire, PubSubClient *mqtt, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout);
     bool InitHardware();
-    bool SendHomeassistantConfig();
     bool Loop();
-
-    void SetBatteryVoltage(float voltage);
 
 private:
     bool Update();
@@ -29,13 +28,8 @@ private:
     void Sleep();
 
     SHTC3 device_;
-    HardwareSerial *serial_;
     TwoWire *wire_;
-    PubSubClient *mqtt_;
 
-    std::shared_ptr<SensorDevice> ha_device_;
     std::shared_ptr<Sensor> ha_temperature_;
     std::shared_ptr<Sensor> ha_humidity_;
-    std::shared_ptr<Sensor> ha_voltage_;
-    std::shared_ptr<Sensor> ha_battery_;
 };

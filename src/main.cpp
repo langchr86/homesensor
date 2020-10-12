@@ -6,6 +6,7 @@
 
 #include <PubSubClient.h>
 
+#include "sensors/adc.h"
 #include "sensors/shtc3.h"
 
 static constexpr size_t kWireSpeedHz = 100000;
@@ -165,8 +166,13 @@ void setup()
   mqtt->setBufferSize(kMqttMaxMessageSize);
   serial->println("Basic MQTT setup finished");
 
+  ADC adc_instance(serial, A0);
+  auto *adc = &adc_instance;
+  adc->SetBitWidth(10);
+  serial->println("ADC setup finished");
+
   const std::chrono::seconds expire_timeout(3 * kReadOutInterval);
-  Shtc3 sensor(serial, wire, mqtt, kSensorName, kSensorId, expire_timeout);
+  Shtc3 sensor(serial, adc, wire, mqtt, kSensorName, kSensorId, expire_timeout);
   if (sensor.InitHardware() == false)
   {
     serial->println("Failed to initialize sensor hardware");
@@ -188,17 +194,6 @@ void setup()
 
   DisconnectWifiAndMqtt(serial, wifi, mqtt);
   serial->println("Initial HA config messages sent");
-
-  float voltage_divider_factor = 2.0;
-  float ADC_max_voltage = 3.6;    // no clue why this works. everyone speaks about 3.3V reference
-  float adc = analogRead(A0);
-  float voltage = adc / 4095.0 * ADC_max_voltage * voltage_divider_factor;
-  serial->print("ADC readout: ");
-  serial->print(adc);
-  serial->print(" = ");
-  serial->print(voltage);
-  serial->println("V");
-  sensor.SetBatteryVoltage(voltage);
 
   serial->println("Finished basic setup. Starting readout interval");
 

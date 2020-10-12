@@ -14,13 +14,10 @@ Not needed because activated in integration setup of mqtt
 
 TODO:
 
-* add sensor base class
 * allow to disable serial debugging?
-* battery level notification
-* deep sleep
 * boot count
+* use boot count to do initial hardware setup and HA config only once / not every time
 * count missed sensor reads and go into deep sleep if not working
-* remove led of SHTC3
 * real sensor integration
 * linear calibration
 * sensor power save modes
@@ -36,6 +33,6 @@ TODO:
 Building steps
 
 * remove LED on SHTC3
-* enable voltage read
+* enable voltage read (2x0ohm)
 
 https://randomnerdtutorials.com/esp32-deep-sleep-arduino-ide-wake-up-sources/

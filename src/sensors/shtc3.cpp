@@ -1,10 +1,8 @@
 #include "shtc3.h"
 
-Shtc3::Shtc3(HardwareSerial *logger, TwoWire *wire, PubSubClient *mqtt, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout)
-    : serial_(logger), wire_(wire), mqtt_(mqtt)
+Shtc3::Shtc3(HardwareSerial *logger, ADC *adc, TwoWire *wire, PubSubClient *mqtt, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout)
+    : SensorBase(logger, adc, mqtt, readable_name, unique_id, expire_timeout), wire_(wire)
 {
-    ha_device_ = std::make_shared<SensorDevice>(readable_name, unique_id, "firebeetle32", "espressif");
-
     ha_temperature_ = std::make_shared<Sensor>("Temperatur", "temperature", SensorDeviceClass::kTemperature, "°C");
     ha_temperature_->SetExpireTimeout(expire_timeout);
     ha_device_->AddSensor(ha_temperature_);
@@ -12,14 +10,6 @@ Shtc3::Shtc3(HardwareSerial *logger, TwoWire *wire, PubSubClient *mqtt, const ch
     ha_humidity_ = std::make_shared<Sensor>("Feuchtigkeit", "humidity", SensorDeviceClass::kHumidity, "%");
     ha_humidity_->SetExpireTimeout(expire_timeout);
     ha_device_->AddSensor(ha_humidity_);
-
-    ha_voltage_ = std::make_shared<Sensor>("Akkuspannung", "voltage", SensorDeviceClass::kNone, "V", "mdi:battery-heart-variant");
-    ha_voltage_->SetExpireTimeout(expire_timeout);
-    ha_device_->AddSensor(ha_voltage_);
-
-    ha_battery_ = std::make_shared<Sensor>("Akkukapazität", "capacity", SensorDeviceClass::kBattery, "%");
-    ha_battery_->SetExpireTimeout(expire_timeout);
-    ha_device_->AddSensor(ha_battery_);
 }
 
 bool Shtc3::InitHardware()
@@ -50,27 +40,10 @@ bool Shtc3::InitHardware()
     return true;
 }
 
-bool Shtc3::SendHomeassistantConfig()
-{
-    for (const auto &message : ha_device_->GetAllConfigMessages())
-    {
-        if (mqtt_->publish(message.GetTopic(), message.GetPayload()) == false)
-        {
-            serial_->println("Failed to publish initial HA config messages to MQTT");
-            return false;
-        }
-
-        serial_->print("Sent HA config message to: ");
-        serial_->println(message.GetTopic());
-        serial_->println(message.GetPayload());
-        serial_->println("-------------------");
-    }
-
-    return true;
-}
-
 bool Shtc3::Loop()
 {
+    BatteryLoop();
+
     if (WakeUp() == false)
     {
         return false;
@@ -109,20 +82,6 @@ bool Shtc3::Loop()
     serial_->println("-------------------");
 
     return true;
-}
-
-void Shtc3::SetBatteryVoltage(float voltage)
-{
-    ha_voltage_->SetValue(voltage, 2);
-
-    auto high = 4.1;
-    auto low = 3.5;
-    auto sum = ((voltage - low) / (high - low)) * 100.0;
-    if (round(sum) >= 100)
-    {
-        sum = 100.0; // if greater than 100% then keep it there.
-    }
-    ha_battery_->SetValue(sum, 0);
 }
 
 bool Shtc3::Update()
