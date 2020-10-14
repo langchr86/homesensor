@@ -40,10 +40,8 @@ bool Shtc3::InitHardware()
     return true;
 }
 
-bool Shtc3::Loop()
+bool Shtc3::InternalLoop()
 {
-    BatteryLoop();
-
     if (WakeUp() == false)
     {
         return false;

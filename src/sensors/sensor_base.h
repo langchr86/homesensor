@@ -18,8 +18,12 @@ public:
 
     bool SendHomeassistantConfig();
 
+    bool Loop();
+
 protected:
     void BatteryLoop();
+
+    virtual bool InternalLoop() = 0;
 
     HardwareSerial *serial_;
     PubSubClient *mqtt_;

@@ -19,7 +19,7 @@ class Shtc3 : public SensorBase
 public:
     Shtc3(HardwareSerial *serial, ADC *adc, TwoWire *wire, PubSubClient *mqtt, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout);
     bool InitHardware();
-    bool Loop();
+    bool InternalLoop();
 
 private:
     bool Update();

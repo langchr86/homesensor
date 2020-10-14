@@ -35,6 +35,12 @@ bool SensorBase::SendHomeassistantConfig()
     return true;
 }
 
+bool SensorBase::Loop()
+{
+    BatteryLoop();
+    return InternalLoop();
+}
+
 void SensorBase::BatteryLoop()
 {
     const auto voltage = adc_->ReadVoltage();
