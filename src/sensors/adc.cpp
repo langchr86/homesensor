@@ -2,8 +2,8 @@
 
 #include <cmath>
 
-ADC::ADC(HardwareSerial *serial, uint8_t pin, float voltage_divider, uint8_t bit_width, float max_voltage)
-    : serial_(serial), pin_(pin), voltage_divider_(voltage_divider), max_value_(4095), max_voltage_(max_voltage)
+ADC::ADC(uint8_t pin, float voltage_divider, uint8_t bit_width, float max_voltage)
+    : logger_("ADC"), pin_(pin), voltage_divider_(voltage_divider), max_value_(4095), max_voltage_(max_voltage)
 {
     SetBitWidth(bit_width);
     analogSetPinAttenuation(pin, adc_attenuation_t::ADC_11db);
@@ -12,8 +12,7 @@ ADC::ADC(HardwareSerial *serial, uint8_t pin, float voltage_divider, uint8_t bit
 float ADC::ReadVoltage() const
 {
     float adc_value = analogRead(pin_);
-    serial_->print("Read ADC value: ");
-    serial_->println(adc_value);
+    logger_.LogDebug("Read ADC value: %f", adc_value);
     return adc_value / static_cast<float>(max_value_) * max_voltage_ * voltage_divider_;
 }
 

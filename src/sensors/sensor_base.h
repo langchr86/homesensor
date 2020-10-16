@@ -4,17 +4,17 @@
 #include <memory>
 
 #include <Arduino.h>
-#include <HardwareSerial.h>
 
 #include <PubSubClient.h>
 
 #include "homeassistant/sensor_device.h"
 #include "sensors/adc.h"
+#include "utils/logger.h"
 
 class SensorBase
 {
 public:
-    SensorBase(HardwareSerial *serial, ADC *adc, PubSubClient *mqtt, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout);
+    SensorBase(ADC *adc, PubSubClient *mqtt, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout, const char *sensor_name);
 
     bool SendHomeassistantConfig();
 
@@ -25,7 +25,7 @@ protected:
 
     virtual bool InternalLoop() = 0;
 
-    HardwareSerial *serial_;
+    Logger logger_;
     PubSubClient *mqtt_;
 
     std::shared_ptr<SensorDevice> ha_device_;

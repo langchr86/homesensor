@@ -1,7 +1,7 @@
 #include "shtc3.h"
 
-Shtc3::Shtc3(HardwareSerial *logger, ADC *adc, TwoWire *wire, PubSubClient *mqtt, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout)
-    : SensorBase(logger, adc, mqtt, readable_name, unique_id, expire_timeout), wire_(wire)
+Shtc3::Shtc3(ADC *adc, TwoWire *wire, PubSubClient *mqtt, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout)
+    : SensorBase(adc, mqtt, readable_name, unique_id, expire_timeout, "SHTC3"), wire_(wire)
 {
     ha_temperature_ = std::make_shared<Sensor>("Temperatur", "temperature", SensorDeviceClass::kTemperature, "°C");
     ha_temperature_->SetExpireTimeout(expire_timeout);
@@ -16,24 +16,19 @@ bool Shtc3::InitHardware()
 {
     if (device_.begin(*wire_) != SHTC3_Status_Nominal)
     {
-        serial_->println("Failed to setup wire connection to sensor");
+        logger_.LogError("Failed to setup wire connection to sensor");
         return false;
     }
 
     if (device_.passIDcrc == false)
     {
-        serial_->println("ID checksum failed");
+        logger_.LogError("ID checksum failed");
         return false;
-    }
-    else
-    {
-        serial_->print("ID checksum passed. Device ID: 0b");
-        serial_->println(device_.ID, BIN);
     }
 
     if (device_.setMode(SHTC3_CMD_CSE_TF_LPM) != SHTC3_Status_Nominal)
     {
-        serial_->println("Failed to set sensor mode");
+        logger_.LogError("Failed to set sensor mode");
         return false;
     }
 
@@ -57,11 +52,11 @@ bool Shtc3::InternalLoop()
 
     if (device_.passRHcrc == false)
     {
-        serial_->println("Sensor CRC failed: Humidity");
+        logger_.LogError("Sensor CRC failed: Humidity");
     }
     if (device_.passTcrc == false)
     {
-        serial_->println("Sensor CRC failed: Temperature");
+        logger_.LogError("Sensor CRC failed: Temperature");
     }
 
     ha_temperature_->SetValue(device_.toDegC());
@@ -70,14 +65,12 @@ bool Shtc3::InternalLoop()
     const auto message = ha_device_->GetStateMessage();
     if (mqtt_->publish(message.GetTopic(), message.GetPayload()) == false)
     {
-        serial_->println("Failed to publish state message to MQTT");
+        logger_.LogError("Failed to publish state message to MQTT");
         return false;
     }
 
-    serial_->print("Sent state message to: ");
-    serial_->println(message.GetTopic());
-    serial_->println(message.GetPayload());
-    serial_->println("-------------------");
+    logger_.LogDebug("Sent state message to: %s", message.GetTopic());
+    logger_.LogDebug("  payload: %s", message.GetPayload());
 
     return true;
 }
@@ -86,7 +79,7 @@ bool Shtc3::Update()
 {
     if (device_.update() != SHTC3_Status_Nominal)
     {
-        serial_->println("Failed read out sensor values");
+        logger_.LogError("Failed read out sensor values");
         return false;
     }
     return true;
@@ -96,7 +89,7 @@ bool Shtc3::WakeUp()
 {
     if (device_.wake(true) != SHTC3_Status_Nominal)
     {
-        serial_->println("Failed to wake up sensor");
+        logger_.LogError("Failed to wake up sensor");
         return false;
     }
     return true;

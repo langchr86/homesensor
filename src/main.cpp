@@ -8,9 +8,9 @@
 
 #include "sensors/adc.h"
 #include "sensors/shtc3.h"
+#include "utils/logger.h"
 
 static constexpr size_t kWireSpeedHz = 100000;
-static constexpr size_t kSerialSpeedBaud = 115200;
 
 static constexpr char kSensorName[] = "Balkon";
 static constexpr char kSensorId[] = "balkon";
@@ -51,156 +51,144 @@ void FlashErrorLED(std::chrono::milliseconds duration = std::chrono::millisecond
   }
 }
 
-void Reboot(HardwareSerial *serial)
+void Reboot(Logger *logger)
 {
   const auto kWaitBeforeReboot = std::chrono::seconds(3);
-  if (serial != nullptr)
-  {
-    serial->print("Restarting in ");
-    serial->print(static_cast<int>(kWaitBeforeReboot.count()));
-    serial->println(" seconds");
-  }
+  logger->LogWarning("Restarting in %u seconds", static_cast<int>(kWaitBeforeReboot.count()));
   FlashErrorLED(kWaitBeforeReboot);
   ESP.restart();
 }
 
-bool InitSerial(HardwareSerial *serial)
-{
-  serial->begin(kSerialSpeedBaud);
-  delay(1000);
-  serial->println("Serial console setup finished");
-  return true;
-}
-
-bool InitWire(HardwareSerial *serial, TwoWire *wire)
+bool InitWire(Logger *logger, TwoWire *wire)
 {
   if (wire->begin() == false)
   {
-    serial->println("Failed to setup i2C");
+    logger->LogError("Failed to setup i2C");
     return false;
   }
   wire->setClock(kWireSpeedHz);
 
-  serial->println("i2C setup finished");
+  logger->LogInfo("i2C setup finished");
   return true;
 }
 
-bool InitWifi(HardwareSerial *serial, WiFiClass *wifi)
+bool InitWifi(Logger *logger, WiFiClass *wifi)
 {
   if (wifi->mode(WIFI_STA) == false)
   {
-    serial->println("Failed to setup WIFI mode");
+    logger->LogError("Failed to setup WIFI mode");
     return false;
   }
   if (wifi->config(kSensorIp, kGatewayIp, kSubnetMask) == false)
   {
-    serial->println("Failed to setup WIFI IP config");
+    logger->LogError("Failed to setup WIFI IP config");
     return false;
   }
 
-  serial->println("Basic WIFI setup finished");
+  logger->LogInfo("Basic WIFI setup finished");
   return true;
 }
 
-bool ConnectWifiAndMqtt(HardwareSerial *serial, WiFiClass *wifi, PubSubClient *mqtt)
+bool ConnectWifiAndMqtt(Logger *logger, WiFiClass *wifi, PubSubClient *mqtt)
 {
-  serial->println("Try to connect to WIFI");
+  logger->LogInfo("Try to connect to WIFI");
   wifi->begin(kWifiSsid, kWifiPassword);
   if (wifi->waitForConnectResult() != WL_CONNECTED)
   {
-    serial->println("WIFI connection failed");
+    logger->LogError("WIFI connection failed");
     return false;
   }
 
   if (wifi->setHostname(kSensorId) == false)
   {
-    serial->println("Failed to setup WIFI hostname");
+    logger->LogError("Failed to setup WIFI hostname");
     return false;
   }
 
-  serial->println("Try to connect to MQTT broker");
+  logger->LogInfo("Try to connect to MQTT broker");
   if (mqtt->connect(kSensorId, kMqttUser, kMqttPassword) == false)
   {
-    serial->print("MQTT connection failed! Error code = ");
-    serial->println(mqtt->getWriteError());
+    logger->LogError("MQTT connection failed! Error code = %i", mqtt->getWriteError());
     return false;
   }
 
   return true;
 }
 
-void DisconnectWifiAndMqtt(HardwareSerial *serial, WiFiClass *wifi, PubSubClient *mqtt)
+void DisconnectWifiAndMqtt(Logger *logger, WiFiClass *wifi, PubSubClient *mqtt)
 {
   mqtt->disconnect();
   if (wifi->disconnect() == false)
   {
-    serial->print("Failed to disconnect WIFI");
+    logger->LogError("Failed to disconnect WIFI");
   }
+}
+
+void DeepSleepNow(Logger *logger, const std::chrono::seconds &duration)
+{
+  logger->LogInfo("going to deep sleep");
+  esp_deep_sleep(std::chrono::duration_cast<std::chrono::microseconds>(duration).count());
 }
 
 void setup()
 {
   DisableLED();
 
-  auto *serial = &Serial;
-  if (InitSerial(serial) == false)
-  {
-    Reboot(nullptr);
-  }
+  Logger logger("Main");
 
   auto *wire = &Wire;
-  if (InitWire(serial, wire) == false)
+  if (InitWire(&logger, wire) == false)
   {
-    Reboot(serial);
+    Reboot(&logger);
   }
 
   auto *wifi = &WiFi;
-  if (InitWifi(serial, wifi) == false)
+  if (InitWifi(&logger, wifi) == false)
   {
-    Reboot(serial);
+    Reboot(&logger);
   }
 
   WiFiClient wifiClient;
   PubSubClient mqttClient(kHomeAssistantIp, kMqttPort, wifiClient);
   auto *mqtt = &mqttClient;
   mqtt->setBufferSize(kMqttMaxMessageSize);
-  serial->println("Basic MQTT setup finished");
+  logger.LogInfo("Basic MQTT setup finished");
 
-  ADC adc_instance(serial, A0);
+  ADC adc_instance(A0);
   auto *adc = &adc_instance;
   adc->SetBitWidth(10);
-  serial->println("ADC setup finished");
+  logger.LogInfo("ADC setup finished");
 
   const std::chrono::seconds expire_timeout(3 * kReadOutInterval);
-  Shtc3 sensor(serial, adc, wire, mqtt, kSensorName, kSensorId, expire_timeout);
+  Shtc3 sensor(adc, wire, mqtt, kSensorName, kSensorId, expire_timeout);
   if (sensor.InitHardware() == false)
   {
-    serial->println("Failed to initialize sensor hardware");
-    Reboot(serial);
+    logger.LogError("Failed to initialize sensor hardware");
+    Reboot(&logger);
   }
-  serial->println("Sensor setup finished");
+  logger.LogInfo("Sensor setup finished");
 
-  if (ConnectWifiAndMqtt(serial, wifi, mqtt) == false)
+  if (ConnectWifiAndMqtt(&logger, wifi, mqtt) == false)
   {
-    serial->println("Failed to connect for initial HA config messages");
-    Reboot(serial);
+    logger.LogError("Failed to connect for initial HA config messages");
+    Reboot(&logger);
   }
 
   if (sensor.SendHomeassistantConfig() == false)
   {
-    serial->println("Failed to send initial HA config messages");
-    Reboot(serial);
+    logger.LogError("Failed to send initial HA config messages");
+    Reboot(&logger);
   }
 
-  DisconnectWifiAndMqtt(serial, wifi, mqtt);
-  serial->println("Initial HA config messages sent");
+  DisconnectWifiAndMqtt(&logger, wifi, mqtt);
+  logger.LogInfo("Initial HA config messages sent");
 
-  serial->println("Finished basic setup. Starting readout interval");
+  logger.LogInfo("Finished basic setup. Starting readout interval");
 
   // === readout loop ====================================================================
   while (true)
   {
-    if (ConnectWifiAndMqtt(serial, wifi, mqtt) == false)
+    if (ConnectWifiAndMqtt(&logger, wifi, mqtt) == false)
     {
       FlashErrorLED();
       continue;
@@ -209,14 +197,13 @@ void setup()
     if (sensor.Loop() == false)
     {
       FlashErrorLED();
-      DisconnectWifiAndMqtt(serial, wifi, mqtt);
+      DisconnectWifiAndMqtt(&logger, wifi, mqtt);
       continue;
     }
 
-    DisconnectWifiAndMqtt(serial, wifi, mqtt);
+    DisconnectWifiAndMqtt(&logger, wifi, mqtt);
 
-    serial->println("going to deep sleep");
-    esp_deep_sleep(std::chrono::duration_cast<std::chrono::microseconds>(kReadOutInterval).count());
+    DeepSleepNow(&logger, kReadOutInterval);
   }
 }
 
