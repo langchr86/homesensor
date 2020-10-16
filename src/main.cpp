@@ -124,8 +124,18 @@ void DisconnectWifiAndMqtt(Logger *logger, WiFiClass *wifi, PubSubClient *mqtt)
   }
 }
 
+void SetPowerOption(Logger *logger, esp_sleep_pd_domain_t domain, esp_sleep_pd_option_t option)
+{
+  const auto result = esp_sleep_pd_config(domain, option);
+  if (result != ESP_OK)
+  {
+    logger->LogError("failed to set power option: domain=%i option=%i", domain, option);
+  }
+}
+
 void DeepSleepNow(Logger *logger, const std::chrono::seconds &duration)
 {
+  SetPowerOption(logger, ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_OFF);
   logger->LogInfo("going to deep sleep");
   esp_deep_sleep(std::chrono::duration_cast<std::chrono::microseconds>(duration).count());
 }
