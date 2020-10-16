@@ -8,6 +8,7 @@
 #include "sensors/shtc3.h"
 #include "utils/led.h"
 #include "utils/logger.h"
+#include "utils/power.h"
 
 static constexpr size_t kWireSpeedHz = 100000;
 
@@ -29,14 +30,6 @@ static constexpr uint16_t kMqttPort = 1883;
 static constexpr size_t kMqttMaxMessageSize = 512;
 
 
-void Reboot(Logger *logger)
-{
-  const auto kWaitBeforeReboot = std::chrono::seconds(3);
-  logger->LogWarning("Restarting in %u seconds", static_cast<int>(kWaitBeforeReboot.count()));
-  Led::FlashFor(kWaitBeforeReboot);
-  ESP.restart();
-}
-
 bool InitWire(Logger *logger, TwoWire *wire)
 {
   if (wire->begin() == false)
@@ -50,39 +43,24 @@ bool InitWire(Logger *logger, TwoWire *wire)
   return true;
 }
 
-void SetPowerOption(Logger *logger, esp_sleep_pd_domain_t domain, esp_sleep_pd_option_t option)
-{
-  const auto result = esp_sleep_pd_config(domain, option);
-  if (result != ESP_OK)
-  {
-    logger->LogError("failed to set power option: domain=%i option=%i", domain, option);
-  }
-}
-
-void DeepSleepNow(Logger *logger, const std::chrono::seconds &duration)
-{
-  SetPowerOption(logger, ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_OFF);
-  logger->LogInfo("going to deep sleep");
-  esp_deep_sleep(std::chrono::duration_cast<std::chrono::microseconds>(duration).count());
-}
-
 void setup()
 {
   Led::Disable();
+  Power power;
 
   Logger logger("Main");
 
   auto *wire = &Wire;
   if (InitWire(&logger, wire) == false)
   {
-    Reboot(&logger);
+    power.Reboot();
   }
 
   Connection connection(kHomeAssistantIp, kMqttPort);
   if (connection.Init(kSensorIp, kGatewayIp, kSubnetMask, kMqttMaxMessageSize) == false)
   {
     logger.LogError("Failed to initialize connection");
-    Reboot(&logger);
+    power.Reboot();
   }
 
   ADC adc_instance(A0);
@@ -95,20 +73,20 @@ void setup()
   if (sensor.InitHardware() == false)
   {
     logger.LogError("Failed to initialize sensor hardware");
-    Reboot(&logger);
+    power.Reboot();
   }
   logger.LogInfo("Sensor setup finished");
 
   if (connection.Connect(kSensorId, kWifiSsid, kWifiPassword, kMqttUser, kMqttPassword) == false)
   {
     logger.LogError("Failed to connect for initial HA config messages");
-    Reboot(&logger);
+    power.Reboot();
   }
 
   if (sensor.SendHomeassistantConfig() == false)
   {
     logger.LogError("Failed to send initial HA config messages");
-    Reboot(&logger);
+    power.Reboot();
   }
 
   connection.Disconnect();
@@ -134,7 +112,7 @@ void setup()
 
     connection.Disconnect();
 
-    DeepSleepNow(&logger, kReadOutInterval);
+    power.DeepSleepNow(kReadOutInterval);
   }
 }
 
