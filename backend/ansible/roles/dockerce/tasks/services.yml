@@ -1,0 +1,20 @@
+---
+
+- name: Create docker-compose config folder for central services
+  become: yes
+  file:
+    path: "/etc/docker-compose"
+    state: directory
+
+- name: Systemd service template file for arbitrary docker-compose services
+  become: yes
+  copy:
+    src: "docker-compose@.service"
+    dest: "/etc/systemd/system/"
+  register: service_template
+
+- name: Reload systemd config files
+  become: yes
+  systemd:
+    daemon_reload: yes
+  when: service_template.changed

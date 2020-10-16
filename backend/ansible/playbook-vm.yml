@@ -1,0 +1,20 @@
+- hosts: all
+
+  pre_tasks:
+  - name: Update package manager repositories
+    become: yes
+    apt:
+      update_cache: yes
+    changed_when: False
+
+  tasks:
+  - include_tasks: tasks/basicsetup.yml
+  - include_tasks: tasks/virtualbox_additions.yml
+
+  roles:
+  - role: ssh
+    vars:
+      ssh_pub_files: ['ssh_key_clang_home.opub']
+
+  - role: dockerce
+  - role: homeassistant

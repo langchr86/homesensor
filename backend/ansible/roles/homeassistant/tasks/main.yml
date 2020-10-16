@@ -1,0 +1,20 @@
+---
+
+- name: Create folder for docker compose file
+  become: yes
+  file:
+    path: "{{ ha_compose_folder }}"
+    state: directory
+
+- name: Copy docker compose file
+  become: yes
+  copy:
+    src: "docker-compose.yml"
+    dest: "{{ ha_compose_folder }}"
+
+- name: Enable and start docker compose service
+  become: yes
+  systemd:
+    name: "docker-compose@{{ ha_service_name }}"
+    state: started
+    enabled: yes

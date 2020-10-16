@@ -1,0 +1,4 @@
+---
+
+ha_service_name: "homeassistant"
+ha_compose_folder: "/etc/docker-compose/{{ ha_service_name }}"

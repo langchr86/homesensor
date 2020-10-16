@@ -1,0 +1,25 @@
+version: '3'
+services:
+  homeassistant:
+    container_name: home-assistant
+    image: homeassistant/home-assistant:stable
+    depends_on:
+      - mqtt
+    volumes:
+      - /etc/homeassistant:/config
+    environment:
+      - TZ=Europe/Zurich
+    restart: always
+    network_mode: host
+
+  mqtt:
+    container_name: mosquitto
+    image: eclipse-mosquitto:latest
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - /etc/mosquitto/config:/mqtt/config:ro
+      - /etc/mosquitto/data/:/mqtt/data
+      - /var/log/mosquitto/log:/mqtt/log
+    restart: always
