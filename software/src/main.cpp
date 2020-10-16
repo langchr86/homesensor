@@ -5,6 +5,7 @@
 
 #include "communication/connection.h"
 #include "sensors/adc.h"
+#include "sensors/scd30.h"
 #include "sensors/shtc3.h"
 #include "utils/led.h"
 #include "utils/logger.h"
@@ -151,8 +152,3 @@ void setup()
 
 // we use only setup() function
 void loop() {}
-
-// TODO(clang)
-// auto co2_sensor = std::make_shared<Sensor>("CO2", "co2", SensorDeviceClass::kNone, "ppm", "mdi:molecule-co2");
-// co2_sensor->SetExpireTimeout(expire_timeout);
-// device.AddSensor(co2_sensor);
