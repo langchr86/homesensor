@@ -6,9 +6,9 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#include <PubSubClient.h>
 #include <SparkFun_SHTC3.h>
 
+#include "communication/connection.h"
 #include "homeassistant/sensor_device.h"
 #include "sensors/forward_declarations.h"
 #include "sensors/sensor_base.h"
@@ -16,7 +16,7 @@
 class Shtc3 : public SensorBase
 {
 public:
-    Shtc3(ADC *adc, TwoWire *wire, PubSubClient *mqtt, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout);
+    Shtc3(ADC *adc, TwoWire *wire, Connection *connection, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout);
     bool InitHardware();
     bool InternalLoop();
 

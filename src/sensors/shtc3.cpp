@@ -1,7 +1,7 @@
 #include "shtc3.h"
 
-Shtc3::Shtc3(ADC *adc, TwoWire *wire, PubSubClient *mqtt, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout)
-    : SensorBase(adc, mqtt, readable_name, unique_id, expire_timeout, "SHTC3"), wire_(wire)
+Shtc3::Shtc3(ADC *adc, TwoWire *wire, Connection *connection, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout)
+    : SensorBase(adc, connection, readable_name, unique_id, expire_timeout, "SHTC3"), wire_(wire)
 {
     ha_temperature_ = std::make_shared<Sensor>("Temperatur", "temperature", SensorDeviceClass::kTemperature, "°C");
     ha_temperature_->SetExpireTimeout(expire_timeout);
@@ -63,7 +63,7 @@ bool Shtc3::InternalLoop()
     ha_humidity_->SetValue(device_.toPercent(), 0);
 
     const auto message = ha_device_->GetStateMessage();
-    if (mqtt_->publish(message.GetTopic(), message.GetPayload()) == false)
+    if (connection_->Publish(message.GetTopic(), message.GetPayload()) == false)
     {
         logger_.LogError("Failed to publish state message to MQTT");
         return false;

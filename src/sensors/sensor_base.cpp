@@ -2,8 +2,8 @@
 
 #include "battery_calculation.h"
 
-SensorBase::SensorBase(ADC *adc, PubSubClient *mqtt, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout, const char *sensor_name)
-    : logger_(sensor_name), mqtt_(mqtt), adc_(adc)
+SensorBase::SensorBase(ADC *adc, Connection *connection, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout, const char *sensor_name)
+    : logger_(sensor_name), connection_(connection), adc_(adc)
 {
     ha_device_ = std::make_shared<SensorDevice>(readable_name, unique_id, "firebeetle32", "espressif");
 
@@ -20,7 +20,7 @@ bool SensorBase::SendHomeassistantConfig()
 {
     for (const auto &message : ha_device_->GetAllConfigMessages())
     {
-        if (mqtt_->publish(message.GetTopic(), message.GetPayload()) == false)
+        if (connection_->Publish(message.GetTopic(), message.GetPayload()) == false)
         {
             logger_.LogError("Failed to publish initial HA config messages to MQTT");
             return false;

@@ -1,11 +1,9 @@
 #include <chrono>
 
 #include <Arduino.h>
-#include <WiFi.h>
 #include <Wire.h>
 
-#include <PubSubClient.h>
-
+#include "communication/connection.h"
 #include "sensors/adc.h"
 #include "sensors/shtc3.h"
 #include "utils/logger.h"
@@ -72,58 +70,6 @@ bool InitWire(Logger *logger, TwoWire *wire)
   return true;
 }
 
-bool InitWifi(Logger *logger, WiFiClass *wifi)
-{
-  if (wifi->mode(WIFI_STA) == false)
-  {
-    logger->LogError("Failed to setup WIFI mode");
-    return false;
-  }
-  if (wifi->config(kSensorIp, kGatewayIp, kSubnetMask) == false)
-  {
-    logger->LogError("Failed to setup WIFI IP config");
-    return false;
-  }
-
-  logger->LogInfo("Basic WIFI setup finished");
-  return true;
-}
-
-bool ConnectWifiAndMqtt(Logger *logger, WiFiClass *wifi, PubSubClient *mqtt)
-{
-  logger->LogInfo("Try to connect to WIFI");
-  wifi->begin(kWifiSsid, kWifiPassword);
-  if (wifi->waitForConnectResult() != WL_CONNECTED)
-  {
-    logger->LogError("WIFI connection failed");
-    return false;
-  }
-
-  if (wifi->setHostname(kSensorId) == false)
-  {
-    logger->LogError("Failed to setup WIFI hostname");
-    return false;
-  }
-
-  logger->LogInfo("Try to connect to MQTT broker");
-  if (mqtt->connect(kSensorId, kMqttUser, kMqttPassword) == false)
-  {
-    logger->LogError("MQTT connection failed! Error code = %i", mqtt->getWriteError());
-    return false;
-  }
-
-  return true;
-}
-
-void DisconnectWifiAndMqtt(Logger *logger, WiFiClass *wifi, PubSubClient *mqtt)
-{
-  mqtt->disconnect();
-  if (wifi->disconnect() == false)
-  {
-    logger->LogError("Failed to disconnect WIFI");
-  }
-}
-
 void SetPowerOption(Logger *logger, esp_sleep_pd_domain_t domain, esp_sleep_pd_option_t option)
 {
   const auto result = esp_sleep_pd_config(domain, option);
@@ -152,17 +98,12 @@ void setup()
     Reboot(&logger);
   }
 
-  auto *wifi = &WiFi;
-  if (InitWifi(&logger, wifi) == false)
+  Connection connection(kHomeAssistantIp, kMqttPort);
+  if (connection.Init(kSensorIp, kGatewayIp, kSubnetMask, kMqttMaxMessageSize) == false)
   {
+    logger.LogError("Failed to initialize connection");
     Reboot(&logger);
   }
-
-  WiFiClient wifiClient;
-  PubSubClient mqttClient(kHomeAssistantIp, kMqttPort, wifiClient);
-  auto *mqtt = &mqttClient;
-  mqtt->setBufferSize(kMqttMaxMessageSize);
-  logger.LogInfo("Basic MQTT setup finished");
 
   ADC adc_instance(A0);
   auto *adc = &adc_instance;
@@ -170,7 +111,7 @@ void setup()
   logger.LogInfo("ADC setup finished");
 
   const std::chrono::seconds expire_timeout(3 * kReadOutInterval);
-  Shtc3 sensor(adc, wire, mqtt, kSensorName, kSensorId, expire_timeout);
+  Shtc3 sensor(adc, wire, &connection, kSensorName, kSensorId, expire_timeout);
   if (sensor.InitHardware() == false)
   {
     logger.LogError("Failed to initialize sensor hardware");
@@ -178,7 +119,7 @@ void setup()
   }
   logger.LogInfo("Sensor setup finished");
 
-  if (ConnectWifiAndMqtt(&logger, wifi, mqtt) == false)
+  if (connection.Connect(kSensorId, kWifiSsid, kWifiPassword, kMqttUser, kMqttPassword) == false)
   {
     logger.LogError("Failed to connect for initial HA config messages");
     Reboot(&logger);
@@ -190,7 +131,7 @@ void setup()
     Reboot(&logger);
   }
 
-  DisconnectWifiAndMqtt(&logger, wifi, mqtt);
+  connection.Disconnect();
   logger.LogInfo("Initial HA config messages sent");
 
   logger.LogInfo("Finished basic setup. Starting readout interval");
@@ -198,7 +139,7 @@ void setup()
   // === readout loop ====================================================================
   while (true)
   {
-    if (ConnectWifiAndMqtt(&logger, wifi, mqtt) == false)
+    if (connection.Connect(kSensorId, kWifiSsid, kWifiPassword, kMqttUser, kMqttPassword) == false)
     {
       FlashErrorLED();
       continue;
@@ -207,11 +148,11 @@ void setup()
     if (sensor.Loop() == false)
     {
       FlashErrorLED();
-      DisconnectWifiAndMqtt(&logger, wifi, mqtt);
+      connection.Disconnect();
       continue;
     }
 
-    DisconnectWifiAndMqtt(&logger, wifi, mqtt);
+    connection.Disconnect();
 
     DeepSleepNow(&logger, kReadOutInterval);
   }

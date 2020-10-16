@@ -5,8 +5,7 @@
 
 #include <Arduino.h>
 
-#include <PubSubClient.h>
-
+#include "communication/connection.h"
 #include "homeassistant/sensor_device.h"
 #include "sensors/adc.h"
 #include "utils/logger.h"
@@ -14,7 +13,7 @@
 class SensorBase
 {
 public:
-    SensorBase(ADC *adc, PubSubClient *mqtt, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout, const char *sensor_name);
+    SensorBase(ADC *adc, Connection *connection, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout, const char *sensor_name);
 
     bool SendHomeassistantConfig();
 
@@ -26,7 +25,7 @@ protected:
     virtual bool InternalLoop() = 0;
 
     Logger logger_;
-    PubSubClient *mqtt_;
+    Connection *connection_;
 
     std::shared_ptr<SensorDevice> ha_device_;
 
