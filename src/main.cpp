@@ -6,6 +6,7 @@
 #include "communication/connection.h"
 #include "sensors/adc.h"
 #include "sensors/shtc3.h"
+#include "utils/led.h"
 #include "utils/logger.h"
 
 static constexpr size_t kWireSpeedHz = 100000;
@@ -27,33 +28,12 @@ static constexpr char kMqttPassword[] = "";
 static constexpr uint16_t kMqttPort = 1883;
 static constexpr size_t kMqttMaxMessageSize = 512;
 
-void DisableLED()
-{
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
-}
-
-void FlashErrorLED(std::chrono::milliseconds duration = std::chrono::milliseconds(3000))
-{
-  constexpr auto kLedIntervalDuration = std::chrono::milliseconds(250);
-  assert(duration >= 2 * kLedIntervalDuration);
-  const size_t iteration_count = duration / (2 * kLedIntervalDuration);
-
-  pinMode(LED_BUILTIN, OUTPUT);
-  for (size_t i = 0; i < iteration_count; ++i)
-  {
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(kLedIntervalDuration.count());
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(kLedIntervalDuration.count());
-  }
-}
 
 void Reboot(Logger *logger)
 {
   const auto kWaitBeforeReboot = std::chrono::seconds(3);
   logger->LogWarning("Restarting in %u seconds", static_cast<int>(kWaitBeforeReboot.count()));
-  FlashErrorLED(kWaitBeforeReboot);
+  Led::FlashFor(kWaitBeforeReboot);
   ESP.restart();
 }
 
@@ -88,7 +68,7 @@ void DeepSleepNow(Logger *logger, const std::chrono::seconds &duration)
 
 void setup()
 {
-  DisableLED();
+  Led::Disable();
 
   Logger logger("Main");
 
@@ -141,13 +121,13 @@ void setup()
   {
     if (connection.Connect(kSensorId, kWifiSsid, kWifiPassword, kMqttUser, kMqttPassword) == false)
     {
-      FlashErrorLED();
+      Led::FlashFor();
       continue;
     }
 
     if (sensor.Loop() == false)
     {
-      FlashErrorLED();
+      Led::FlashFor();
       connection.Disconnect();
       continue;
     }
