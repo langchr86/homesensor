@@ -16,13 +16,14 @@ public:
     SensorBase(ADC *adc, Connection *connection, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout, const char *sensor_name);
 
     bool SendHomeassistantConfig();
+    bool SendHomeassistantState();
 
-    bool Loop();
+    bool SensorReadLoop();
 
 protected:
     void BatteryLoop();
 
-    virtual bool InternalLoop() = 0;
+    virtual bool InternalSensorReadLoop() = 0;
 
     Logger logger_;
     Connection *connection_;

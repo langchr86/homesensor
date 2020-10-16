@@ -22,21 +22,36 @@ bool SensorBase::SendHomeassistantConfig()
     {
         if (connection_->Publish(message.GetTopic(), message.GetPayload()) == false)
         {
-            logger_.LogError("Failed to publish initial HA config messages to MQTT");
+            logger_.LogError("Failed to publish config message to MQTT");
             return false;
         }
 
-        logger_.LogDebug("Sent HA config message to: %s", message.GetTopic());
-        logger_.LogDebug("  payload: %s", message.GetPayload());
+        logger_.LogInfo("Sent config message to: %s", message.GetTopic());
+        logger_.LogInfo("  payload: %s", message.GetPayload());
     }
 
     return true;
 }
 
-bool SensorBase::Loop()
+bool SensorBase::SendHomeassistantState()
+{
+    const auto message = ha_device_->GetStateMessage();
+    if (connection_->Publish(message.GetTopic(), message.GetPayload()) == false)
+    {
+        logger_.LogError("Failed to publish state message to MQTT");
+        return false;
+    }
+
+    logger_.LogInfo("Sent state message to: %s", message.GetTopic());
+    logger_.LogInfo("  payload: %s", message.GetPayload());
+
+    return true;
+}
+
+bool SensorBase::SensorReadLoop()
 {
     BatteryLoop();
-    return InternalLoop();
+    return InternalSensorReadLoop();
 }
 
 void SensorBase::BatteryLoop()

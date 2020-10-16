@@ -96,6 +96,7 @@ void setup()
     logger.LogError("Failed to initialize Wire connection");
     ErrorHappened(nullptr, &power, &logger);
   }
+  logger.LogDebug("Success: InitWire");
 
   Connection connection(kHomeAssistantIp, kMqttPort);
   if (connection.Init(kSensorIp, kGatewayIp, kSubnetMask, kMqttMaxMessageSize) == false)
@@ -103,6 +104,7 @@ void setup()
     logger.LogError("Failed to initialize Wifi/Mqtt connection");
     ErrorHappened(&connection, &power, &logger);
   }
+  logger.LogDebug("Success: connection.Init");
 
   ADC adc(A0);
   adc.SetBitWidth(10);
@@ -114,25 +116,32 @@ void setup()
     logger.LogError("Failed to initialize sensor hardware");
     ErrorHappened(&connection, &power, &logger);
   }
+  logger.LogDebug("Success: sensor.InitHardware");
+
+  if (sensor.SensorReadLoop() == false)
+  {
+    logger.LogError("Sensor read out loop failed");
+    ErrorHappened(&connection, &power, &logger);
+  }
+  logger.LogDebug("Success: sensor.SensorReadLoop");
 
   if (connection.Connect(kSensorId, kWifiSsid, kWifiPassword, kMqttUser, kMqttPassword) == false)
   {
     logger.LogError("Failed to connect for initial HA config messages");
     ErrorHappened(&connection, &power, &logger);
   }
+  logger.LogDebug("Success: connection.Connect");
 
   if (boot_count == 1) // only send HA config at first boot
   {
     if (sensor.SendHomeassistantConfig() == false)
     {
-      logger.LogError("Failed to send initial HA config messages");
       ErrorHappened(&connection, &power, &logger);
     }
   }
 
-  if (sensor.Loop() == false)
+  if (sensor.SendHomeassistantState() == false)
   {
-    logger.LogError("Sensor loop failed");
     ErrorHappened(&connection, &power, &logger);
   }
 

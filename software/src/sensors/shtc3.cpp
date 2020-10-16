@@ -35,7 +35,7 @@ bool Shtc3::InitHardware()
     return true;
 }
 
-bool Shtc3::InternalLoop()
+bool Shtc3::InternalSensorReadLoop()
 {
     if (WakeUp() == false)
     {
@@ -53,24 +53,22 @@ bool Shtc3::InternalLoop()
     if (device_.passRHcrc == false)
     {
         logger_.LogError("Sensor CRC failed: Humidity");
+        ha_humidity_->SetValue(0, 0);
     }
+    else
+    {
+        ha_humidity_->SetValue(device_.toPercent(), 0);
+    }
+
     if (device_.passTcrc == false)
     {
         logger_.LogError("Sensor CRC failed: Temperature");
+        ha_temperature_->SetValue(0);
     }
-
-    ha_temperature_->SetValue(device_.toDegC());
-    ha_humidity_->SetValue(device_.toPercent(), 0);
-
-    const auto message = ha_device_->GetStateMessage();
-    if (connection_->Publish(message.GetTopic(), message.GetPayload()) == false)
+    else
     {
-        logger_.LogError("Failed to publish state message to MQTT");
-        return false;
+        ha_temperature_->SetValue(device_.toDegC());
     }
-
-    logger_.LogDebug("Sent state message to: %s", message.GetTopic());
-    logger_.LogDebug("  payload: %s", message.GetPayload());
 
     return true;
 }
