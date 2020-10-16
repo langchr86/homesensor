@@ -14,12 +14,7 @@ Not needed because activated in integration setup of mqtt
 
 TODO:
 
-* boot count
-* use boot count to do initial hardware setup and HA config only once / not every time
-* count missed sensor reads and go into deep sleep if not working
-* increase deep sleep if no connection (3x try connection then 2x deep sleep. Next time no connection 4x deep sleep until max_deep_sleep)
-* add runtime counter
-* real sensor integration
+* split sensor read out and data sending
 * linear calibration for individual sensor values
 * sensor power save modes
 * long time stability
@@ -37,5 +32,6 @@ Building steps
 
 * remove LED on SHTC3
 * enable voltage read (2x0ohm)
+* use direct 3.3V in
 
 https://randomnerdtutorials.com/esp32-deep-sleep-arduino-ide-wake-up-sources/

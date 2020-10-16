@@ -14,7 +14,8 @@ static constexpr size_t kWireSpeedHz = 100000;
 
 static constexpr char kSensorName[] = "Balkon";
 static constexpr char kSensorId[] = "balkon";
-static constexpr auto kReadOutInterval = std::chrono::seconds(10);
+static constexpr auto kDefaultReadOutInterval = std::chrono::seconds(10);
+static constexpr auto kMaxReadOutInterval = kDefaultReadOutInterval * 10;
 
 static constexpr char kWifiSsid[] = "";
 static constexpr char kWifiPassword[] = "";
@@ -29,6 +30,9 @@ static constexpr char kMqttPassword[] = "";
 static constexpr uint16_t kMqttPort = 1883;
 static constexpr size_t kMqttMaxMessageSize = 512;
 
+RTC_DATA_ATTR size_t boot_count = 0;
+RTC_DATA_ATTR size_t failed_consecutive_boots = 0;
+RTC_DATA_ATTR std::chrono::seconds read_out_interval = kDefaultReadOutInterval;
 
 bool InitWire(Logger *logger, TwoWire *wire)
 {
@@ -39,81 +43,100 @@ bool InitWire(Logger *logger, TwoWire *wire)
   }
   wire->setClock(kWireSpeedHz);
 
-  logger->LogInfo("i2C setup finished");
   return true;
+}
+
+void ErrorHappened(Connection *connection, Power *power, Logger *logger)
+{
+  if (connection != nullptr)
+  {
+    connection->Disconnect();
+  }
+
+  Led::FlashFor();
+  failed_consecutive_boots++;
+
+  if (failed_consecutive_boots > 3)
+  {
+    read_out_interval *= 2;
+    failed_consecutive_boots = 0;
+
+    if (read_out_interval > kMaxReadOutInterval)
+    {
+      read_out_interval = kMaxReadOutInterval;
+    }
+
+    logger->LogInfo("Increased read out interval to %u seconds", read_out_interval.count());
+  }
+
+  power->DeepSleepNow(read_out_interval);
+}
+
+void EndWithNoError(Connection *connection, Power *power)
+{
+  failed_consecutive_boots = 0;
+  read_out_interval = kDefaultReadOutInterval;
+  connection->Disconnect();
+  power->DeepSleepNow(read_out_interval);
 }
 
 void setup()
 {
+  boot_count++;
+
   Led::Disable();
   Power power;
 
   Logger logger("Main");
+  logger.LogInfo("boot_count=%u", boot_count);
 
   auto *wire = &Wire;
   if (InitWire(&logger, wire) == false)
   {
-    power.Reboot();
+    logger.LogError("Failed to initialize Wire connection");
+    ErrorHappened(nullptr, &power, &logger);
   }
 
   Connection connection(kHomeAssistantIp, kMqttPort);
   if (connection.Init(kSensorIp, kGatewayIp, kSubnetMask, kMqttMaxMessageSize) == false)
   {
-    logger.LogError("Failed to initialize connection");
-    power.Reboot();
+    logger.LogError("Failed to initialize Wifi/Mqtt connection");
+    ErrorHappened(&connection, &power, &logger);
   }
 
-  ADC adc_instance(A0);
-  auto *adc = &adc_instance;
-  adc->SetBitWidth(10);
-  logger.LogInfo("ADC setup finished");
+  ADC adc(A0);
+  adc.SetBitWidth(10);
 
-  const std::chrono::seconds expire_timeout(3 * kReadOutInterval);
-  Shtc3 sensor(adc, wire, &connection, kSensorName, kSensorId, expire_timeout);
+  const std::chrono::seconds expire_timeout(3 * kDefaultReadOutInterval);
+  Shtc3 sensor(&adc, wire, &connection, kSensorName, kSensorId, expire_timeout);
   if (sensor.InitHardware() == false)
   {
     logger.LogError("Failed to initialize sensor hardware");
-    power.Reboot();
+    ErrorHappened(&connection, &power, &logger);
   }
-  logger.LogInfo("Sensor setup finished");
 
   if (connection.Connect(kSensorId, kWifiSsid, kWifiPassword, kMqttUser, kMqttPassword) == false)
   {
     logger.LogError("Failed to connect for initial HA config messages");
-    power.Reboot();
+    ErrorHappened(&connection, &power, &logger);
   }
 
-  if (sensor.SendHomeassistantConfig() == false)
+  if (boot_count == 1) // only send HA config at first boot
   {
-    logger.LogError("Failed to send initial HA config messages");
-    power.Reboot();
+    if (sensor.SendHomeassistantConfig() == false)
+    {
+      logger.LogError("Failed to send initial HA config messages");
+      ErrorHappened(&connection, &power, &logger);
+    }
   }
 
-  connection.Disconnect();
-  logger.LogInfo("Initial HA config messages sent");
-
-  logger.LogInfo("Finished basic setup. Starting readout interval");
-
-  // === readout loop ====================================================================
-  while (true)
+  if (sensor.Loop() == false)
   {
-    if (connection.Connect(kSensorId, kWifiSsid, kWifiPassword, kMqttUser, kMqttPassword) == false)
-    {
-      Led::FlashFor();
-      continue;
-    }
-
-    if (sensor.Loop() == false)
-    {
-      Led::FlashFor();
-      connection.Disconnect();
-      continue;
-    }
-
-    connection.Disconnect();
-
-    power.DeepSleepNow(kReadOutInterval);
+    logger.LogError("Sensor loop failed");
+    ErrorHappened(&connection, &power, &logger);
   }
+
+  EndWithNoError(&connection, &power);
 }
 
 // we use only setup() function

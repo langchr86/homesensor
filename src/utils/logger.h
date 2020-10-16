@@ -8,7 +8,7 @@
 
 #include "utils/system_time.h"
 
-// #define LOG_DISABLE
+#define LOG_DISABLE
 
 enum Severity
 {
