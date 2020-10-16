@@ -15,7 +15,8 @@ Getting started
 Debugging
 ---------
 
-* logger
+* #define LOG_DISABLE
+* logger.SetMaxLevel(LOG_INFO);
 
 
 

@@ -88,6 +88,7 @@ void setup()
   Power power;
 
   Logger logger("Main");
+  logger.SetMaxLevel(LOG_INFO);
   logger.LogInfo("boot_count=%u", boot_count);
 
   auto *wire = &Wire;
