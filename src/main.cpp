@@ -3,21 +3,21 @@
 #include <Arduino.h>
 #include <WiFi.h>
 
-#define MQTT_MAX_PACKET_SIZE 256 // needs to be directly set in the library files
-#include <ArduinoMqttClient.h>
+#include <PubSubClient.h>
 
 #include "sensor_device.h"
 
-static const std::string kWifiSsid = "";
-static const std::string kWifiPassword = "";
+static constexpr char kWifiSsid[] = "";
+static constexpr char kWifiPassword[] = "";
 
-static const std::string kHomeAssistantIp = "192.168.0.25";
+static const IPAddress kHomeAssistantIp(192, 168, 0, 25);
 static const uint16_t kMqttPort = 1883;
-static const std::string kMqttUser = "";
-static const std::string kMqttPassword = "";
+static constexpr char kMqttUser[] = "";
+static constexpr char kMqttPassword[] = "";
+static constexpr size_t kMqttMaxMessageSize = 512;
 
 WiFiClient wifiClient;
-MqttClient mqttClient(wifiClient);
+PubSubClient mqttClient(kHomeAssistantIp, kMqttPort, wifiClient);
 
 SensorDevice device("Balkon", "balkon", "firebeetle32", "espressif");
 
@@ -40,17 +40,14 @@ void setup()
 
   pinMode(LED_BUILTIN, OUTPUT);
 
-  IPAddress ip;
-  ip.fromString("192.168.0.11");
-  IPAddress gateway;
-  gateway.fromString("192.168.0.1");
-  IPAddress subnet;
-  subnet.fromString("255.255.255.0");
+  const IPAddress ip(192, 168, 0, 11);
+  const IPAddress gateway(192, 168, 0, 1);
+  const IPAddress subnet(255, 255, 255, 0);
 
   WiFi.mode(WIFI_STA);
   WiFi.setHostname(device.GetUniqueId().c_str());
   WiFi.config(ip, gateway, subnet);
-  WiFi.begin(kWifiSsid.c_str(), kWifiPassword.c_str());
+  WiFi.begin(kWifiSsid, kWifiPassword);
   while (WiFi.waitForConnectResult() != WL_CONNECTED)
   {
     Serial.println("Connection Failed! Rebooting...");
@@ -59,16 +56,12 @@ void setup()
     Serial.println("restarting");
   }
 
-  IPAddress ha_ip;
-  ha_ip.fromString(kHomeAssistantIp.c_str());
+  mqttClient.setBufferSize(kMqttMaxMessageSize);
 
-  mqttClient.setId(device.GetUniqueId().c_str());
-  mqttClient.setUsernamePassword(kMqttUser.c_str(), kMqttPassword.c_str());
-
-  if (!mqttClient.connect(ha_ip, kMqttPort))
+  if (!mqttClient.connect(device.GetUniqueId().c_str(), kMqttUser, kMqttPassword))
   {
     Serial.print("MQTT connection failed! Error code = ");
-    Serial.println(mqttClient.connectError());
+    Serial.println(mqttClient.getWriteError());
     blinkError(5);
     ESP.restart();
     Serial.println("restarting");
@@ -78,7 +71,7 @@ void setup()
   auto temperature_sensor = std::make_shared<Sensor>("Temperatur", "temperature", SensorDeviceClass::kTemperature, "°C");
   temperature_sensor->SetExpireTimeout(expire_timeout);
   temperature_sensor->SetValue(23.3),
-  device.AddSensor(temperature_sensor);
+      device.AddSensor(temperature_sensor);
 
   auto humidity_sensor = std::make_shared<Sensor>("Feuchtigkeit", "humidity", SensorDeviceClass::kHumidity, "%");
   humidity_sensor->SetExpireTimeout(expire_timeout);
@@ -95,26 +88,24 @@ void loop()
 {
   Serial.println("I am working");
 
-  mqttClient.poll();
-
   for (const auto &message : device.GetAllConfigMessages())
   {
-    mqttClient.beginMessage(message.GetTopic(), false);
-    mqttClient.print(message.GetPayload());
-    mqttClient.endMessage();
+    const auto result = mqttClient.publish(message.GetTopic(), message.GetPayload());
 
     Serial.print("Sent config message to: ");
     Serial.println(message.GetTopic());
     Serial.println(message.GetPayload());
+    if (result == false)
+    {
+      Serial.println("failed to send!");
+    }
     Serial.println("-------------------");
   }
 
   // TODO(clang): temperature_sensor->SetValue(9.9);
 
   const auto state_message = device.GetStateMessage();
-  mqttClient.beginMessage(state_message.GetTopic(), false);
-  mqttClient.print(state_message.GetPayload());
-  mqttClient.endMessage();
+  mqttClient.publish(state_message.GetTopic(), state_message.GetPayload());
 
   Serial.println("Sent state message to: ");
   Serial.println(state_message.GetTopic());
