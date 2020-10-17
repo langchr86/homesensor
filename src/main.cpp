@@ -1,14 +1,13 @@
-#include <string>
+#include <memory>
 
 #include <Arduino.h>
 #include <WiFi.h>
 
-#define MQTT_MAX_PACKET_SIZE 256  // needs to be directly set in the library files
+#define MQTT_MAX_PACKET_SIZE 256 // needs to be directly set in the library files
 #include <ArduinoMqttClient.h>
 
-#include "auto_discovery.h"
+#include "sensor_device.h"
 
-static const std::string kRoomName = "balkon";
 static const std::string kWifiSsid = "";
 static const std::string kWifiPassword = "";
 
@@ -20,10 +19,12 @@ static const std::string kMqttPassword = "";
 WiFiClient wifiClient;
 MqttClient mqttClient(wifiClient);
 
-AutoDiscovery temperature_sensor;
+SensorDevice device("Balkon", "balkon", "firebeetle32", "espressif");
 
-void blinkError(size_t seconds) {
-  for (size_t i = 0; i < seconds * 2; ++i) {
+void blinkError(size_t seconds)
+{
+  for (size_t i = 0; i < seconds * 2; ++i)
+  {
     digitalWrite(LED_BUILTIN, HIGH);
     delay(250);
     digitalWrite(LED_BUILTIN, LOW);
@@ -31,7 +32,8 @@ void blinkError(size_t seconds) {
   }
 }
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
   delay(1000);
   Serial.println("Booting");
@@ -46,10 +48,11 @@ void setup() {
   subnet.fromString("255.255.255.0");
 
   WiFi.mode(WIFI_STA);
-  WiFi.setHostname(kRoomName.c_str());
+  WiFi.setHostname(device.GetUniqueId().c_str());
   WiFi.config(ip, gateway, subnet);
   WiFi.begin(kWifiSsid.c_str(), kWifiPassword.c_str());
-  while (WiFi.waitForConnectResult() != WL_CONNECTED) {
+  while (WiFi.waitForConnectResult() != WL_CONNECTED)
+  {
     Serial.println("Connection Failed! Rebooting...");
     blinkError(5);
     ESP.restart();
@@ -59,10 +62,11 @@ void setup() {
   IPAddress ha_ip;
   ha_ip.fromString(kHomeAssistantIp.c_str());
 
-  mqttClient.setId(kRoomName.c_str());
+  mqttClient.setId(device.GetUniqueId().c_str());
   mqttClient.setUsernamePassword(kMqttUser.c_str(), kMqttPassword.c_str());
 
-  if (!mqttClient.connect(ha_ip, kMqttPort)) {
+  if (!mqttClient.connect(ha_ip, kMqttPort))
+  {
     Serial.print("MQTT connection failed! Error code = ");
     Serial.println(mqttClient.connectError());
     blinkError(5);
@@ -70,41 +74,45 @@ void setup() {
     Serial.println("restarting");
   }
 
-  temperature_sensor.SetNameAndUniqueId("Balkon Temperature", "balkon");
-  temperature_sensor.SetExpireTimeout(std::chrono::seconds(3));
-  temperature_sensor.SetDeviceInfo("balkon");
-  temperature_sensor.SetSensorData(SensorDeviceClass::kTemperature, "°C");
+  const std::chrono::seconds expire_timeout(3);
+  auto temperature_sensor = std::make_shared<Sensor>("Temperature", "temperature", SensorDeviceClass::kTemperature, "°C");
+  temperature_sensor->SetExpireTimeout(expire_timeout);
+  auto humidity_sensor = std::make_shared<Sensor>("Humidity", "humidity", SensorDeviceClass::kHumidity, "%");
+  humidity_sensor->SetExpireTimeout(expire_timeout);
+
+  device.AddSensor(temperature_sensor);
+  device.AddSensor(humidity_sensor);
 }
 
-void loop() {
+void loop()
+{
   Serial.println("I am working");
 
   mqttClient.poll();
 
+  for (const auto &message : device.GetAllConfigMessages())
+  {
+    mqttClient.beginMessage(message.GetTopic(), false);
+    mqttClient.print(message.GetPayload());
+    mqttClient.endMessage();
 
-  const auto config_topic = temperature_sensor.GetConfigTopic();
-  const auto config_payload = temperature_sensor.GetConfigString();
-  mqttClient.beginMessage(config_topic.c_str(), false);
-  mqttClient.print(config_payload.c_str());
-  mqttClient.endMessage();
+    Serial.print("Sent config message to: ");
+    Serial.println(message.GetTopic());
+    Serial.println(message.GetPayload());
+    Serial.println("-------------------");
+  }
 
-  Serial.print("Sent config message to: ");
-  Serial.println(config_topic.c_str());
-  Serial.println(config_payload.c_str());
-  Serial.println("-------------------");
+  // TODO(clang): temperature_sensor->SetValue(9.9);
 
-  temperature_sensor.SetSensorValue(9.9);
-  const auto state_topic = temperature_sensor.GetStateTopic();
-  const auto state_payload = temperature_sensor.GetStateString();
-  mqttClient.beginMessage(state_topic.c_str(), false);
-  mqttClient.print(state_payload.c_str());
+  const auto state_message = device.GetStateMessage();
+  mqttClient.beginMessage(state_message.GetTopic(), false);
+  mqttClient.print(state_message.GetPayload());
   mqttClient.endMessage();
 
   Serial.println("Sent state message to: ");
-  Serial.println(state_topic.c_str());
-  Serial.println(state_payload.c_str());
+  Serial.println(state_message.GetTopic());
+  Serial.println(state_message.GetPayload());
   Serial.println("-------------------");
-
 
   digitalWrite(LED_BUILTIN, HIGH);
   delay(500);

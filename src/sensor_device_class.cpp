@@ -2,9 +2,7 @@
 
 #include <cassert>
 
-namespace std {
-
-std::string to_string(SensorDeviceClass device_class) {
+String ToString(SensorDeviceClass device_class) {
     using SDC = SensorDeviceClass;
     switch(device_class) {
         case SDC::kNone: return "none";
@@ -20,6 +18,4 @@ std::string to_string(SensorDeviceClass device_class) {
 
     assert(false);
     return "";
-}
-
 }

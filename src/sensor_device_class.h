@@ -1,4 +1,6 @@
-#include <string>
+#pragma once
+
+#include <Arduino.h>
 
 enum class SensorDeviceClass
 {
@@ -13,8 +15,4 @@ enum class SensorDeviceClass
     kTimestamp,
 };
 
-namespace std {
-
-std::string to_string(SensorDeviceClass device_class);
-
-}
+String ToString(SensorDeviceClass device_class);
