@@ -14,7 +14,7 @@ Not needed because activated in integration setup of mqtt
 
 TODO:
 
-* error handling!!
+* allow to disable serial debugging?
 * battery level notification
 * deep sleep
 * real sensor integration
@@ -25,3 +25,4 @@ TODO:
 * merge repos
 * ansible for real hardware and vargant
 * readmes (how to, images, description of hardware)
+* 3D printed case
