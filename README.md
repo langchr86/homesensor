@@ -29,9 +29,9 @@ Getting started
 
 The whole project consists of the following parts:
 
-* [Backend setup](backend/)
-* [Device production](device_production/)
-* [Software](software/)
+* [Backend Software](backend/)
+* [Hardware](hardware/)
+* [Device Software](software/)
 
 See the linked sub-pages for further instructions.
 
