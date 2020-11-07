@@ -1,0 +1,5 @@
+provisioner:
+   name: ansible
+   playbooks:
+      prepare: prepare.yml
+      converge: ../../ansible/playbook-molecule.yml
