@@ -1,6 +1,8 @@
 homesensor
 ==========
 
+[![Software Build](https://github.com/langchr86/homesensor/workflows/software_build/badge.svg)](https://github.com/langchr86/homesensor/actions?query=workflow%3Asoftware_build)
+
 Air quality sensor designed for battery operation and central data collection in HomeAssistant.
 
 
