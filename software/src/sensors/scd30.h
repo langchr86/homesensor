@@ -33,6 +33,11 @@ private:
     bool InternalSensorRead() override;
     void InternalPowerDown() override;
 
+private:
+    bool Connect();
+    bool WaitForDataAvailable(const std::chrono::milliseconds &timeout = kMinReadoutInterval);
+    bool ForceRecalibrationvalue();
+
     SCD30 device_;
     TwoWire *wire_;
 
