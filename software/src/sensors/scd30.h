@@ -15,6 +15,11 @@
 
 class Scd30 : public SensorBase
 {
+    static constexpr auto kMaxReadoutInterval = std::chrono::seconds(1800);
+    static constexpr auto kMinReadoutInterval = std::chrono::seconds(2);
+    static constexpr std::chrono::seconds kHardwareStartupDuration = std::chrono::seconds(2);
+    static constexpr uint16_t kFreshAirReferencePpm = 400;
+
 public:
     Scd30(ADC *adc, TwoWire *wire, Connection *connection, Power *power, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout);
 
