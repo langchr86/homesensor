@@ -93,8 +93,6 @@ void setup()
 
   Logger logger("Main");
   logger.SetMaxLevel(LOG_INFO);
-  logger.LogInfo("boot_count=%u", boot_count);
-  logger.LogInfo("failed_boot_count=%u", failed_boot_count);
 
   auto *wire = &Wire;
   if (InitWire(&logger, wire) == false)

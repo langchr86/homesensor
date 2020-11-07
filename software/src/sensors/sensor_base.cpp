@@ -98,8 +98,13 @@ bool SensorBase::LowPower() const
 
 void SensorBase::SetDebugInfos(size_t boot_count, size_t failed_boots, std::chrono::seconds max_readout_interval)
 {
+    logger_.LogInfo("boot_count=%u", boot_count);
     ha_boot_count_->SetValue(boot_count, 0);
+
+    logger_.LogInfo("failed_boots=%u", failed_boots);
     ha_failed_boots_->SetValue(failed_boots, 0);
+
+    logger_.LogInfo("max_readout_interval=%llus", max_readout_interval.count());
     ha_max_readout_interval_->SetValue(max_readout_interval.count(), 0);
 }
 
