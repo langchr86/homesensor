@@ -67,7 +67,7 @@ void ErrorHappened(Connection *connection, Power *power, Logger *logger)
       read_out_interval = kMaxReadOutInterval;
     }
 
-    logger->LogInfo("Increased read out interval to %u seconds", read_out_interval.count());
+    logger->LogInfo("Increased read out interval to %u seconds", static_cast<int>(read_out_interval.count()));
   }
 
   power->DeepSleepNow(read_out_interval);
