@@ -33,5 +33,3 @@
   apt:
     name: docker-compose
     state: present
-
-- include_tasks: tasks/services.yml

@@ -2,4 +2,5 @@
 
   roles:
   # - role: dockerce
+  - role: docker-compose-service
   - role: homeassistant
