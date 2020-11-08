@@ -12,11 +12,11 @@ Setup on existing server
 ------------------------
 
 For the real installation you need a linux server that has a running `docker-compose` installation.
-You can either use the existing role to install `docker-ce`
+You can either use the existing role to install `dockerce` / `dockerio`
+or install with your package manager e.g. `apt install docker.io docker-compose`
 or use some other way e.g. [github.com/geerlingguy/ansible-role-docker](https://github.com/geerlingguy/ansible-role-docker).
 
 You then can clone this repo on your server and run the script `run_local.sh`.
-If you want to also setup `docker-ce` you can uncomment the corresponding line in `ansible/playbook.yml`.
 Or you can include the `homeassistant` role in your own ansible playbook for your server.
 
 Now you can configure home assistant.
