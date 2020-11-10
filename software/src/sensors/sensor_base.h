@@ -8,18 +8,18 @@
 #include "communication/connection.h"
 #include "homeassistant/sensor_device.h"
 #include "sensors/adc.h"
+#include "sensors/sensor_interface.h"
 #include "utils/logger.h"
 
-class SensorBase
+class SensorBase : public SensorInterface
 {
 public:
     SensorBase(ADC *adc, Connection *connection, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout, const char *sensor_name);
 
-    bool SendHomeassistantConfig();
-    bool SendHomeassistantState();
+    bool SendHomeassistantConfig() override;
+    bool SendHomeassistantState() override;
 
-    virtual bool InitHardware() = 0;
-    bool SensorReadLoop();
+    bool SensorReadLoop() override;
 
 protected:
     virtual bool InternalPowerUp() = 0;
