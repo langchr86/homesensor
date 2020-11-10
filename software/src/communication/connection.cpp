@@ -1,24 +1,25 @@
 #include "connection.h"
 
-Connection::Connection(IPAddress home_assistant_ip, uint16_t mqtt_port)
-    : logger_("ConnectionHelper"), wifi_(&WiFi), mqtt_client_(home_assistant_ip, mqtt_port, wifi_client_)
+Connection::Connection(IPAddress home_assistant_ip, uint16_t mqtt_port, IPAddress gateway_ip, IPAddress subnet_mask, size_t mqtt_buffer_size)
+    : logger_("ConnectionHelper"), wifi_(&WiFi), mqtt_client_(home_assistant_ip, mqtt_port, wifi_client_),
+      gateway_ip_(gateway_ip), subnet_mask_(subnet_mask), mqtt_buffer_size_(mqtt_buffer_size)
 {
 }
 
-bool Connection::Init(IPAddress own_static_ip, IPAddress gateway_ip, IPAddress subnet_mask, size_t mqtt_buffer_size)
+bool Connection::Init(IPAddress own_static_ip)
 {
     if (wifi_->mode(WIFI_STA) == false)
     {
         logger_.LogError("Failed to setup WIFI mode");
         return false;
     }
-    if (wifi_->config(own_static_ip, gateway_ip, subnet_mask) == false)
+    if (wifi_->config(own_static_ip, gateway_ip_, subnet_mask_) == false)
     {
         logger_.LogError("Failed to setup static WIFI IP config");
         return false;
     }
 
-    if (mqtt_client_.setBufferSize(mqtt_buffer_size) == false)
+    if (mqtt_client_.setBufferSize(mqtt_buffer_size_) == false)
     {
         logger_.LogError("Failed to set MQTT buffer size");
         return false;

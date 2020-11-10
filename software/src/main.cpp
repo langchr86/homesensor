@@ -4,9 +4,8 @@
 #include <Wire.h>
 
 #include "communication/connection.h"
+#include "infrastructure/device_factory.h"
 #include "sensors/adc.h"
-#include "sensors/scd30.h"
-#include "sensors/shtc3.h"
 #include "utils/led.h"
 #include "utils/logger.h"
 #include "utils/power.h"
@@ -100,27 +99,36 @@ void setup()
   }
   logger.LogDebug("Success: InitWire");
 
-  Connection connection(kHomeAssistantIp, kMqttPort);
-  if (connection.Init(kSensorIp, kGatewayIp, kSubnetMask, kMqttMaxMessageSize) == false)
-  {
-    logger.LogError("Failed to initialize Wifi/Mqtt connection");
-    ErrorHappened(&connection, &power, &logger);
-  }
-  logger.LogDebug("Success: connection.Init");
-
   ADC adc(A0);
   adc.SetBitWidth(10);
 
+  Connection connection(kHomeAssistantIp, kMqttPort, kGatewayIp, kSubnetMask, kMqttMaxMessageSize);
+
   const std::chrono::seconds expire_timeout(3 * kDefaultReadOutInterval);
-  Shtc3 sensor(&adc, wire, &connection, kSensorName, kSensorId, expire_timeout);
-  if (sensor.InitHardware() == false)
+  DeviceFactory factory(read_out_interval, expire_timeout);
+
+  DeviceConfig config;
+  config.type = DeviceType::kShtc3;
+  config.name = kSensorName;
+  config.unique_id = kSensorId;
+  config.ip_address = kSensorIp;
+  const auto sensor = factory.CreateDevice(config, &adc, wire, &connection);
+
+  if (sensor == nullptr)
+  {
+    logger.LogError("Failed to create sensor device");
+    ErrorHappened(&connection, &power, &logger);
+  }
+  logger.LogDebug("Success: factory.CreateDevice");
+
+  if (sensor->InitHardware() == false)
   {
     logger.LogError("Failed to initialize sensor hardware");
     ErrorHappened(&connection, &power, &logger);
   }
   logger.LogDebug("Success: sensor.InitHardware");
 
-  if (sensor.SensorReadLoop() == false)
+  if (sensor->SensorReadLoop() == false)
   {
     logger.LogError("Sensor read out loop failed");
     ErrorHappened(&connection, &power, &logger);
@@ -136,13 +144,13 @@ void setup()
 
   if (boot_count == 1 || failed_consecutive_boots > 0) // only send HA config at first boot or after failed boot
   {
-    if (sensor.SendHomeassistantConfig() == false)
+    if (sensor->SendHomeassistantConfig() == false)
     {
       ErrorHappened(&connection, &power, &logger);
     }
   }
 
-  if (sensor.SendHomeassistantState() == false)
+  if (sensor->SendHomeassistantState() == false)
   {
     ErrorHappened(&connection, &power, &logger);
   }
