@@ -44,7 +44,12 @@ bool Scd30::InitHardware()
     return true;
 }
 
-bool Scd30::InternalSensorReadLoop()
+bool Scd30::InternalPowerUp()
+{
+    return true;
+}
+
+bool Scd30::InternalSensorMeasurement()
 {
     if (device_.dataAvailable() == false)
     {
@@ -57,4 +62,17 @@ bool Scd30::InternalSensorReadLoop()
     ha_co2_->SetValue(device_.getCO2());
 
     return true;
+}
+
+void Scd30::InternalPowerSave()
+{
+}
+
+bool Scd30::InternalSensorRead()
+{
+    return true;
+}
+
+void Scd30::InternalPowerDown()
+{
 }

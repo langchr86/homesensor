@@ -18,9 +18,14 @@ class Scd30 : public SensorBase
 public:
     Scd30(ADC *adc, TwoWire *wire, Connection *connection, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout);
     bool InitHardware();
-    bool InternalSensorReadLoop() override;
 
 private:
+    bool InternalPowerUp() override;
+    bool InternalSensorMeasurement() override;
+    void InternalPowerSave() override;
+    bool InternalSensorRead() override;
+    void InternalPowerDown() override;
+
     SCD30 device_;
     TwoWire *wire_;
 

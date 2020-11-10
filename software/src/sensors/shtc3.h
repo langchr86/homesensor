@@ -17,14 +17,14 @@ class Shtc3 : public SensorBase
 {
 public:
     Shtc3(ADC *adc, TwoWire *wire, Connection *connection, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout);
-    bool InitHardware();
-    bool InternalSensorReadLoop() override;
+    bool InitHardware() override;
 
 private:
-    bool Update();
-
-    bool WakeUp();
-    void Sleep();
+    bool InternalPowerUp() override;
+    bool InternalSensorMeasurement() override;
+    void InternalPowerSave() override;
+    bool InternalSensorRead() override;
+    void InternalPowerDown() override;
 
     SHTC3 device_;
     TwoWire *wire_;

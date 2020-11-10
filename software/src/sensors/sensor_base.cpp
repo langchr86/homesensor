@@ -51,7 +51,32 @@ bool SensorBase::SendHomeassistantState()
 bool SensorBase::SensorReadLoop()
 {
     BatteryLoop();
-    return InternalSensorReadLoop();
+
+    if (InternalPowerUp() == false)
+    {
+        logger_.LogError("Failed to wake up sensor");
+        return false;
+    }
+
+    if (InternalSensorMeasurement() == false)
+    {
+        logger_.LogError("Failed to take sensor measurements");
+        InternalPowerSave();
+        InternalPowerDown();
+        return false;
+    }
+
+    InternalPowerSave();
+
+    if (InternalSensorRead() == false)
+    {
+        logger_.LogError("Failed to read sensor values");
+        InternalPowerDown();
+        return false;
+    }
+
+    InternalPowerDown();
+    return true;
 }
 
 void SensorBase::BatteryLoop()

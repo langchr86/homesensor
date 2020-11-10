@@ -35,21 +35,23 @@ bool Shtc3::InitHardware()
     return true;
 }
 
-bool Shtc3::InternalSensorReadLoop()
+bool Shtc3::InternalPowerUp()
 {
-    if (WakeUp() == false)
-    {
-        return false;
-    }
+    return device_.wake(true) == SHTC3_Status_Nominal;
+}
 
-    if (Update() == false)
-    {
-        Sleep();
-        return false;
-    }
+bool Shtc3::InternalSensorMeasurement()
+{
+    return device_.update() == SHTC3_Status_Nominal;
+}
 
-    Sleep();
+void Shtc3::InternalPowerSave()
+{
+    device_.sleep(true);
+}
 
+bool Shtc3::InternalSensorRead()
+{
     if (device_.passRHcrc == false)
     {
         logger_.LogError("Sensor CRC failed: Humidity");
@@ -69,31 +71,9 @@ bool Shtc3::InternalSensorReadLoop()
     {
         ha_temperature_->SetValue(device_.toDegC());
     }
-
     return true;
 }
 
-bool Shtc3::Update()
+void Shtc3::InternalPowerDown()
 {
-    if (device_.update() != SHTC3_Status_Nominal)
-    {
-        logger_.LogError("Failed read out sensor values");
-        return false;
-    }
-    return true;
-}
-
-bool Shtc3::WakeUp()
-{
-    if (device_.wake(true) != SHTC3_Status_Nominal)
-    {
-        logger_.LogError("Failed to wake up sensor");
-        return false;
-    }
-    return true;
-}
-
-void Shtc3::Sleep()
-{
-    device_.sleep(true);
 }

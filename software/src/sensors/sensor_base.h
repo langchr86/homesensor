@@ -18,12 +18,15 @@ public:
     bool SendHomeassistantConfig();
     bool SendHomeassistantState();
 
+    virtual bool InitHardware() = 0;
     bool SensorReadLoop();
 
 protected:
-    void BatteryLoop();
-
-    virtual bool InternalSensorReadLoop() = 0;
+    virtual bool InternalPowerUp() = 0;
+    virtual bool InternalSensorMeasurement() = 0;
+    virtual void InternalPowerSave() = 0;
+    virtual bool InternalSensorRead() = 0;
+    virtual void InternalPowerDown() = 0;
 
     Logger logger_;
     Connection *connection_;
@@ -31,6 +34,8 @@ protected:
     std::shared_ptr<SensorDevice> ha_device_;
 
 private:
+    void BatteryLoop();
+
     ADC *adc_;
     std::shared_ptr<Sensor> ha_voltage_;
     std::shared_ptr<Sensor> ha_battery_;
