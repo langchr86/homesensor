@@ -134,7 +134,7 @@ void setup()
   }
   logger.LogDebug("Success: connection.Connect");
 
-  if (boot_count == 1) // only send HA config at first boot
+  if (boot_count == 1 || failed_consecutive_boots > 0) // only send HA config at first boot or after failed boot
   {
     if (sensor.SendHomeassistantConfig() == false)
     {
