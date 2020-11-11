@@ -32,6 +32,7 @@ static constexpr uint16_t kMqttPort = 1883;
 static constexpr size_t kMqttMaxMessageSize = 512;
 
 RTC_DATA_ATTR size_t boot_count = 0;
+RTC_DATA_ATTR size_t failed_boot_count = 0;
 RTC_DATA_ATTR size_t failed_consecutive_boots = 0;
 RTC_DATA_ATTR std::chrono::seconds read_out_interval = kDefaultReadOutInterval;
 
@@ -55,6 +56,7 @@ void ErrorHappened(Connection *connection, Power *power, Logger *logger)
   }
 
   Led::FlashFor();
+  failed_boot_count++;
   failed_consecutive_boots++;
 
   if (failed_consecutive_boots > 3)
@@ -91,6 +93,7 @@ void setup()
   Logger logger("Main");
   logger.SetMaxLevel(LOG_INFO);
   logger.LogInfo("boot_count=%u", boot_count);
+  logger.LogInfo("failed_boot_count=%u", failed_boot_count);
 
   auto *wire = &Wire;
   if (InitWire(&logger, wire) == false)
