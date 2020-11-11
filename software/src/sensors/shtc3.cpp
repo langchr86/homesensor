@@ -13,6 +13,11 @@ Shtc3::Shtc3(ADC *adc, TwoWire *wire, Connection *connection, Power *power, cons
     ha_device_->AddSensor(ha_humidity_);
 }
 
+bool Shtc3::HardwareInitialization(const std::chrono::seconds &readout_interval)
+{
+    return true;
+}
+
 bool Shtc3::InternalPowerUp()
 {
     if (device_.begin(*wire_) != SHTC3_Status_Nominal)

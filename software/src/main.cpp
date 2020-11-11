@@ -12,6 +12,7 @@
 
 std::shared_ptr<SensorInterface> sensor = nullptr;
 
+RTC_DATA_ATTR bool sensor_hardware_initialized = false;
 RTC_DATA_ATTR size_t boot_count = 0;
 RTC_DATA_ATTR size_t failed_boot_count = 0;
 RTC_DATA_ATTR size_t failed_consecutive_boots = 0;
@@ -119,6 +120,17 @@ void setup()
     ErrorHappened(&connection, &power, &logger);
   }
   logger.LogDebug("Success: factory.CreateDevice");
+
+  if (sensor_hardware_initialized == false)
+  {
+    if (sensor->HardwareInitialization(kDefaultReadoutInterval) == false)
+    {
+      logger.LogError("Sensor hardware initialization failed");
+      ErrorHappened(&connection, &power, &logger);
+    }
+    sensor_hardware_initialized = true;
+    logger.LogDebug("Success: sensor.HardwareInitialization");
+  }
 
   if (sensor->SensorReadLoop() == false)
   {
