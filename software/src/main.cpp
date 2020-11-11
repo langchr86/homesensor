@@ -14,8 +14,9 @@ static constexpr size_t kWireSpeedHz = 100000;
 
 static constexpr char kSensorName[] = "Balkon";
 static constexpr char kSensorId[] = "balkon";
-static constexpr auto kDefaultReadOutInterval = std::chrono::seconds(10);
-static constexpr auto kMaxReadOutInterval = kDefaultReadOutInterval * 10;
+static constexpr std::chrono::seconds kDefaultReadOutInterval = std::chrono::minutes(1);
+static constexpr std::chrono::seconds kMaxReadOutInterval = std::chrono::minutes(30);
+static_assert(kMaxReadOutInterval > kDefaultReadOutInterval, "kMaxReadOutInterval needs to be bigger then kDefaultReadOutInterval");
 
 static constexpr char kWifiSsid[] = "";
 static constexpr char kWifiPassword[] = "";
