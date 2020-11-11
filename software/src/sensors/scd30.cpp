@@ -24,22 +24,6 @@ bool Scd30::InitHardware()
         return false;
     }
 
-    // TODO(clang)
-    if (device_.setAltitudeCompensation(387) == false)
-    {
-        logger_.LogError("Failed to setup altitude compensation");
-        return false;
-    }
-
-    // TODO(clang)
-    logger_.LogDebug("Temperature offset: %f", device_.getTemperatureOffset());
-
-    // TODO(clang)
-    if (device_.setMeasurementInterval(10) == false)
-    {
-        logger_.LogError("Failed to set sensor mode");
-        return false;
-    }
 
     return true;
 }
@@ -75,4 +59,9 @@ bool Scd30::InternalSensorRead()
 
 void Scd30::InternalPowerDown()
 {
+    // TODO(clang): use real readout interval
+    if (device_.setMeasurementInterval(30) == false)
+    {
+        logger_.LogError("Failed to set measurement interval");
+    }
 }
