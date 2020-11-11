@@ -111,7 +111,7 @@ void setup()
   const std::chrono::seconds expire_timeout(3 * kDefaultReadoutInterval);
   DeviceFactory factory(readout_interval, expire_timeout);
 
-  sensor = factory.CreateDevice(config[kDeviceConfigIndex], &adc, wire, &connection);
+  sensor = factory.CreateDevice(config[kDeviceConfigIndex], &adc, wire, &connection, &power);
 
   if (sensor == nullptr)
   {

@@ -16,7 +16,7 @@
 class Scd30 : public SensorBase
 {
 public:
-    Scd30(ADC *adc, TwoWire *wire, Connection *connection, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout);
+    Scd30(ADC *adc, TwoWire *wire, Connection *connection, Power *power, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout);
 
 private:
     bool InternalPowerUp() override;

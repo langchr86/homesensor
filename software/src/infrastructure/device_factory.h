@@ -12,13 +12,14 @@
 #include "communication/connection.h"
 #include "sensors/adc.h"
 #include "utils/logger.h"
+#include "utils/power.h"
 
 class DeviceFactory
 {
 public:
     DeviceFactory(const std::chrono::seconds &readout_interval, const std::chrono::seconds &expire_timeout);
 
-    std::shared_ptr<SensorInterface> CreateDevice(const DeviceConfig &config, ADC *adc, TwoWire *wire, Connection *connection);
+    std::shared_ptr<SensorInterface> CreateDevice(const DeviceConfig &config, ADC *adc, TwoWire *wire, Connection *connection, Power *power);
 
 private:
     Logger logger_;

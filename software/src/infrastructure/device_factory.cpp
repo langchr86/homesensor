@@ -8,7 +8,7 @@ DeviceFactory::DeviceFactory(const std::chrono::seconds &readout_interval, const
 {
 }
 
-std::shared_ptr<SensorInterface> DeviceFactory::CreateDevice(const DeviceConfig &config, ADC *adc, TwoWire *wire, Connection *connection)
+std::shared_ptr<SensorInterface> DeviceFactory::CreateDevice(const DeviceConfig &config, ADC *adc, TwoWire *wire, Connection *connection, Power *power)
 {
     connection->SetOwnStaticIp(config.ip_address);
 
@@ -16,10 +16,10 @@ std::shared_ptr<SensorInterface> DeviceFactory::CreateDevice(const DeviceConfig 
     switch (config.type)
     {
     case DeviceType::kShtc3:
-        sensor = std::make_shared<Shtc3>(adc, wire, connection, config.name.c_str(), config.unique_id.c_str(), expire_timeout_);
+        sensor = std::make_shared<Shtc3>(adc, wire, connection, power, config.name.c_str(), config.unique_id.c_str(), expire_timeout_);
         break;
     case DeviceType::kScd30:
-        sensor = std::make_shared<Scd30>(adc, wire, connection, config.name.c_str(), config.unique_id.c_str(), expire_timeout_);
+        sensor = std::make_shared<Scd30>(adc, wire, connection, power, config.name.c_str(), config.unique_id.c_str(), expire_timeout_);
         break;
     }
 

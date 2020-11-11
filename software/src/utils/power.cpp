@@ -1,6 +1,7 @@
 #include "power.h"
 
-#include <Arduino.h>
+#include <Esp.h>
+#include <esp_sleep.h>
 
 #include "utils/led.h"
 
@@ -20,6 +21,31 @@ void Power::DeepSleepNow(const std::chrono::seconds &duration)
     SetOption(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_OFF);
     logger_.LogInfo("going to deep sleep for %u seconds", static_cast<int>(duration.count()));
     esp_deep_sleep(std::chrono::duration_cast<std::chrono::microseconds>(duration).count());
+}
+
+bool Power::LightSleepNow(const std::chrono::microseconds &duration)
+{
+    const std::chrono::microseconds kSettingSleep(1000);
+    if (duration <= kSettingSleep)
+    {
+        logger_.LogError("duration is too small");
+        return false;
+    }
+
+    const std::chrono::microseconds real_value = duration - kSettingSleep;
+    if (esp_sleep_enable_timer_wakeup(real_value.count()) != ESP_OK)
+    {
+        logger_.LogError("failed to set wakeup option");
+        return false;
+    }
+    delayMicroseconds(kSettingSleep.count());
+
+    if (esp_light_sleep_start() != ESP_OK)
+    {
+        logger_.LogError("failed to start light sleep");
+        return false;
+    }
+    return true;
 }
 
 void Power::Reboot()

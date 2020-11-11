@@ -11,6 +11,7 @@ public:
 
     void SetOption(esp_sleep_pd_domain_t domain, esp_sleep_pd_option_t option);
     void DeepSleepNow(const std::chrono::seconds &duration);
+    bool LightSleepNow(const std::chrono::microseconds &duration);
     void Reboot();
 
 private:

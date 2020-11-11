@@ -2,8 +2,8 @@
 
 #include "battery_calculation.h"
 
-SensorBase::SensorBase(ADC *adc, Connection *connection, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout, const char *sensor_name)
-    : logger_(sensor_name), connection_(connection), adc_(adc), last_battery_level_(100)
+SensorBase::SensorBase(ADC *adc, Connection *connection, Power *power, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout, const char *sensor_name)
+    : logger_(sensor_name), connection_(connection), power_(power), adc_(adc), last_battery_level_(100)
 {
     ha_device_ = std::make_shared<SensorDevice>(readable_name, unique_id, "firebeetle32", "espressif");
 

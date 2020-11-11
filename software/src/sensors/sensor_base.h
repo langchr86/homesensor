@@ -10,17 +10,17 @@
 #include "sensors/adc.h"
 #include "sensors/sensor_interface.h"
 #include "utils/logger.h"
+#include "utils/power.h"
 
 class SensorBase : public SensorInterface
 {
 public:
-    SensorBase(ADC *adc, Connection *connection, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout, const char *sensor_name);
+    SensorBase(ADC *adc, Connection *connection, Power *power, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout, const char *sensor_name);
 
     bool SendHomeassistantConfig() override;
     bool SendHomeassistantState() override;
 
     bool SensorReadLoop() override;
-
     bool LowPower() const override;
 
     void SetDebugInfos(size_t boot_count, size_t failed_boots, std::chrono::seconds max_readout_interval) override;
@@ -34,6 +34,7 @@ protected:
 
     Logger logger_;
     Connection *connection_;
+    Power *power_;
 
     std::shared_ptr<SensorDevice> ha_device_;
 
