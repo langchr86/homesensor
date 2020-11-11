@@ -6,14 +6,18 @@ Connection::Connection(IPAddress home_assistant_ip, uint16_t mqtt_port, IPAddres
 {
 }
 
-bool Connection::Init(IPAddress own_static_ip)
+void Connection::SetOwnStaticIp(IPAddress own_static_ip) {
+    own_static_ip_ = own_static_ip;
+}
+
+bool Connection::Init()
 {
     if (wifi_->mode(WIFI_STA) == false)
     {
         logger_.LogError("Failed to setup WIFI mode");
         return false;
     }
-    if (wifi_->config(own_static_ip, gateway_ip_, subnet_mask_) == false)
+    if (wifi_->config(own_static_ip_, gateway_ip_, subnet_mask_) == false)
     {
         logger_.LogError("Failed to setup static WIFI IP config");
         return false;

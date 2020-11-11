@@ -139,6 +139,12 @@ void setup()
   }
   logger.LogDebug("Success: sensor.SensorReadLoop");
 
+  if (connection.Init() == false)
+  {
+    ErrorHappened(&connection, &power, &logger);
+  }
+  logger.LogDebug("Success: connection.Init");
+
   if (connection.Connect(kSensorId, kWifiSsid, kWifiPassword, kMqttUser, kMqttPassword) == false)
   {
     ErrorHappened(&connection, &power, &logger);

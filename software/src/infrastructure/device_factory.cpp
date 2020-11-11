@@ -10,6 +10,8 @@ DeviceFactory::DeviceFactory(const std::chrono::seconds &readout_interval, const
 
 std::shared_ptr<SensorInterface> DeviceFactory::CreateDevice(const DeviceConfig &config, ADC *adc, TwoWire *wire, Connection *connection)
 {
+    connection->SetOwnStaticIp(config.ip_address);
+
     std::shared_ptr<SensorInterface> sensor;
     switch (config.type)
     {
@@ -20,13 +22,6 @@ std::shared_ptr<SensorInterface> DeviceFactory::CreateDevice(const DeviceConfig 
         sensor = std::make_shared<Scd30>(adc, wire, connection, config.name.c_str(), config.unique_id.c_str(), expire_timeout_);
         break;
     }
-
-    if (connection->Init(config.ip_address) == false)
-    {
-        logger_.LogError("Failed to initialize Wifi/Mqtt connection");
-        return nullptr;
-    }
-    logger_.LogDebug("Success: connection.Init");
 
     return sensor;
 }
