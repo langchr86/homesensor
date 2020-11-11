@@ -141,7 +141,6 @@ void setup()
 
   if (connection.Connect(kSensorId, kWifiSsid, kWifiPassword, kMqttUser, kMqttPassword) == false)
   {
-    logger.LogError("Failed to connect for initial HA config messages");
     ErrorHappened(&connection, &power, &logger);
   }
   logger.LogDebug("Success: connection.Connect");
