@@ -7,8 +7,10 @@
 
 struct DeviceConfig
 {
+    DeviceConfig(DeviceType type, IPAddress ip_address, String name, String unique_id);
+
     DeviceType type;
+    IPAddress ip_address;
     String name;
     String unique_id;
-    IPAddress ip_address;
 };

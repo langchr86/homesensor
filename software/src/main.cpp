@@ -1,5 +1,3 @@
-#include <chrono>
-
 #include <Arduino.h>
 #include <Wire.h>
 
@@ -10,26 +8,7 @@
 #include "utils/logger.h"
 #include "utils/power.h"
 
-static constexpr size_t kWireSpeedHz = 100000;
-
-static constexpr char kSensorName[] = "Balkon";
-static constexpr char kSensorId[] = "balkon";
-static constexpr std::chrono::seconds kDefaultReadOutInterval = std::chrono::minutes(1);
-static constexpr std::chrono::seconds kMaxReadOutInterval = std::chrono::minutes(30);
-static_assert(kMaxReadOutInterval > kDefaultReadOutInterval, "kMaxReadOutInterval needs to be bigger then kDefaultReadOutInterval");
-
-static constexpr char kWifiSsid[] = "";
-static constexpr char kWifiPassword[] = "";
-
-static const IPAddress kHomeAssistantIp(192, 168, 0, 25);
-static const IPAddress kSensorIp(192, 168, 0, 11);
-static const IPAddress kGatewayIp(192, 168, 0, 1);
-static const IPAddress kSubnetMask(255, 255, 255, 0);
-
-static constexpr char kMqttUser[] = "";
-static constexpr char kMqttPassword[] = "";
-static constexpr uint16_t kMqttPort = 1883;
-static constexpr size_t kMqttMaxMessageSize = 512;
+#include "config.h"
 
 RTC_DATA_ATTR size_t boot_count = 0;
 RTC_DATA_ATTR size_t failed_boot_count = 0;
@@ -111,12 +90,7 @@ void setup()
   const std::chrono::seconds expire_timeout(3 * kDefaultReadOutInterval);
   DeviceFactory factory(read_out_interval, expire_timeout);
 
-  DeviceConfig config;
-  config.type = DeviceType::kShtc3;
-  config.name = kSensorName;
-  config.unique_id = kSensorId;
-  config.ip_address = kSensorIp;
-  const auto sensor = factory.CreateDevice(config, &adc, wire, &connection);
+  const auto sensor = factory.CreateDevice(config[kDeviceConfigIndex], &adc, wire, &connection);
 
   if (sensor == nullptr)
   {
@@ -138,7 +112,7 @@ void setup()
   }
   logger.LogDebug("Success: connection.Init");
 
-  if (connection.Connect(kSensorId, kWifiSsid, kWifiPassword, kMqttUser, kMqttPassword) == false)
+  if (connection.Connect(config[kDeviceConfigIndex].unique_id.c_str(), kWifiSsid, kWifiPassword, kMqttUser, kMqttPassword) == false)
   {
     ErrorHappened(&connection, &power, &logger);
   }
