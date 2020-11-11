@@ -12,7 +12,7 @@ Shtc3::Shtc3(ADC *adc, TwoWire *wire, Connection *connection, const char *readab
     ha_device_->AddSensor(ha_humidity_);
 }
 
-bool Shtc3::InitHardware()
+bool Shtc3::InternalPowerUp()
 {
     if (device_.begin(*wire_) != SHTC3_Status_Nominal)
     {
@@ -32,12 +32,13 @@ bool Shtc3::InitHardware()
         return false;
     }
 
-    return true;
-}
+    if (device_.wake(true) != SHTC3_Status_Nominal)
+    {
+        logger_.LogError("Failed to wake up sensor");
+        return false;
+    }
 
-bool Shtc3::InternalPowerUp()
-{
-    return device_.wake(true) == SHTC3_Status_Nominal;
+    return true;
 }
 
 bool Shtc3::InternalSensorMeasurement()

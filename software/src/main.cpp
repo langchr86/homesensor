@@ -125,13 +125,6 @@ void setup()
   }
   logger.LogDebug("Success: factory.CreateDevice");
 
-  if (sensor->InitHardware() == false)
-  {
-    logger.LogError("Failed to initialize sensor hardware");
-    ErrorHappened(&connection, &power, &logger);
-  }
-  logger.LogDebug("Success: sensor.InitHardware");
-
   if (sensor->SensorReadLoop() == false)
   {
     logger.LogError("Sensor read out loop failed");

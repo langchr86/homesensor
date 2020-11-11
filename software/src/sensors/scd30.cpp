@@ -16,7 +16,7 @@ Scd30::Scd30(ADC *adc, TwoWire *wire, Connection *connection, const char *readab
     ha_device_->AddSensor(ha_co2_);
 }
 
-bool Scd30::InitHardware()
+bool Scd30::InternalPowerUp()
 {
     if (device_.begin(*wire_) == false)
     {
@@ -24,12 +24,6 @@ bool Scd30::InitHardware()
         return false;
     }
 
-
-    return true;
-}
-
-bool Scd30::InternalPowerUp()
-{
     return true;
 }
 
