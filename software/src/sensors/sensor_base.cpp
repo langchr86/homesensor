@@ -3,7 +3,7 @@
 #include "battery_calculation.h"
 
 SensorBase::SensorBase(ADC *adc, Connection *connection, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout, const char *sensor_name)
-    : logger_(sensor_name), connection_(connection), adc_(adc)
+    : logger_(sensor_name), connection_(connection), adc_(adc), last_battery_level_(100)
 {
     ha_device_ = std::make_shared<SensorDevice>(readable_name, unique_id, "firebeetle32", "espressif");
 
@@ -79,10 +79,15 @@ bool SensorBase::SensorReadLoop()
     return true;
 }
 
+bool SensorBase::LowPower() const
+{
+    return last_battery_level_ < 10;
+}
+
 void SensorBase::BatteryLoop()
 {
     const auto voltage = adc_->ReadVoltage();
-    const auto battery_level = BatteryCalculation::CapacityLevelPercent(voltage);
-    ha_battery_->SetValue(battery_level, 0);
+    last_battery_level_ = BatteryCalculation::CapacityLevelPercent(voltage);
+    ha_battery_->SetValue(last_battery_level_, 0);
     ha_voltage_->SetValue(voltage, 2);
 }

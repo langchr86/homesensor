@@ -10,6 +10,8 @@
 
 #include "config.h"
 
+std::shared_ptr<SensorInterface> sensor = nullptr;
+
 RTC_DATA_ATTR size_t boot_count = 0;
 RTC_DATA_ATTR size_t failed_boot_count = 0;
 RTC_DATA_ATTR size_t failed_consecutive_boots = 0;
@@ -25,6 +27,19 @@ bool InitWire(Logger *logger, TwoWire *wire)
   wire->setClock(kWireSpeedHz);
 
   return true;
+}
+
+void Sleep(Power *power, Logger *logger)
+{
+  if (sensor->LowPower())
+  {
+    logger->LogWarning("Force kMaxReadOutInterval because of low power");
+    power->DeepSleepNow(kMaxReadOutInterval);
+  }
+  else
+  {
+    power->DeepSleepNow(read_out_interval);
+  }
 }
 
 void ErrorHappened(Connection *connection, Power *power, Logger *logger)
@@ -51,15 +66,15 @@ void ErrorHappened(Connection *connection, Power *power, Logger *logger)
     logger->LogInfo("Increased read out interval to %u seconds", static_cast<int>(read_out_interval.count()));
   }
 
-  power->DeepSleepNow(read_out_interval);
+  Sleep(power, logger);
 }
 
-void EndWithNoError(Connection *connection, Power *power)
+void EndWithNoError(Connection *connection, Power *power, Logger *logger)
 {
   failed_consecutive_boots = 0;
   read_out_interval = kDefaultReadOutInterval;
   connection->Disconnect();
-  power->DeepSleepNow(read_out_interval);
+  Sleep(power, logger);
 }
 
 void setup()
@@ -90,7 +105,7 @@ void setup()
   const std::chrono::seconds expire_timeout(3 * kDefaultReadOutInterval);
   DeviceFactory factory(read_out_interval, expire_timeout);
 
-  const auto sensor = factory.CreateDevice(config[kDeviceConfigIndex], &adc, wire, &connection);
+  sensor = factory.CreateDevice(config[kDeviceConfigIndex], &adc, wire, &connection);
 
   if (sensor == nullptr)
   {
@@ -131,7 +146,7 @@ void setup()
     ErrorHappened(&connection, &power, &logger);
   }
 
-  EndWithNoError(&connection, &power);
+  EndWithNoError(&connection, &power, &logger);
 }
 
 // we use only setup() function

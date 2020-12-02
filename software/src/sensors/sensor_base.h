@@ -21,6 +21,8 @@ public:
 
     bool SensorReadLoop() override;
 
+    bool LowPower() const override;
+
 protected:
     virtual bool InternalPowerUp() = 0;
     virtual bool InternalSensorMeasurement() = 0;
@@ -39,4 +41,6 @@ private:
     ADC *adc_;
     std::shared_ptr<Sensor> ha_voltage_;
     std::shared_ptr<Sensor> ha_battery_;
+
+    float last_battery_level_;
 };

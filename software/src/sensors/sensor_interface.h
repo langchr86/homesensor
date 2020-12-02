@@ -9,4 +9,6 @@ public:
     virtual bool SendHomeassistantState() = 0;
 
     virtual bool SensorReadLoop() = 0;
+
+    virtual bool LowPower() const = 0;
 };
