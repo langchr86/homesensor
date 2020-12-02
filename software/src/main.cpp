@@ -121,6 +121,8 @@ void setup()
   }
   logger.LogDebug("Success: sensor.SensorReadLoop");
 
+  sensor->SetDebugInfos(boot_count, failed_boot_count, failed_consecutive_boots);
+
   if (connection.Init() == false)
   {
     ErrorHappened(&connection, &power, &logger);

@@ -23,6 +23,8 @@ public:
 
     bool LowPower() const override;
 
+    void SetDebugInfos(size_t boot_count, size_t failed_boots, size_t failed_consecutive_boots) override;
+
 protected:
     virtual bool InternalPowerUp() = 0;
     virtual bool InternalSensorMeasurement() = 0;
@@ -41,6 +43,9 @@ private:
     ADC *adc_;
     std::shared_ptr<Sensor> ha_voltage_;
     std::shared_ptr<Sensor> ha_battery_;
+    std::shared_ptr<Sensor> ha_boot_count_;
+    std::shared_ptr<Sensor> ha_failed_boots_;
+    std::shared_ptr<Sensor> ha_failed_consecutive_boots_;
 
     float last_battery_level_;
 };
