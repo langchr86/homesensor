@@ -83,7 +83,7 @@ void setup()
   logger.LogDebug("Success: InitWire");
 
   ADC adc(A0);
-  adc.SetBitWidth(10);
+  adc.SetBitWidth(9);
 
   Connection connection(kHomeAssistantIp, kMqttPort, kGatewayIp, kSubnetMask, kMqttMaxMessageSize);
 
