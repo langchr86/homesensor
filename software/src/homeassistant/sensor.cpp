@@ -15,7 +15,9 @@ void Sensor::SetExpireTimeout(const std::chrono::seconds &timeout)
 
 void Sensor::SetValue(float value, size_t decimal_precision)
 {
-    value_ = String(value, decimal_precision);
+    String value_string(value, decimal_precision);
+    value_string.trim();
+    value_ = value_string;
 }
 
 String Sensor::GetConfigPayload() const
