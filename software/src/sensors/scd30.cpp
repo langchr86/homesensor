@@ -37,7 +37,7 @@ bool Scd30::InternalSensorMeasurement()
 
     ha_humidity_->SetValue(device_.getHumidity(), 0);
     ha_temperature_->SetValue(device_.getTemperature());
-    ha_co2_->SetValue(device_.getCO2());
+    ha_co2_->SetValue(device_.getCO2(), 0);
 
     return true;
 }
