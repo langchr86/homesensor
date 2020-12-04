@@ -5,8 +5,8 @@
 static constexpr char kDeviceJsonObjectName[] = "device";
 
 Sensor::Sensor(const String &readable_name, const String &unique_id, SensorDeviceClass device_class, const String &unit_of_measurement, const String &icon)
-    : readable_name_(readable_name), unique_id_(unique_id),
-      device_class_(device_class), unit_of_measurement_(unit_of_measurement), icon_(icon), expire_timeout_(1), value_(0) {}
+    : logger_(unique_id.c_str()), readable_name_(readable_name), unique_id_(unique_id),
+      device_class_(device_class), unit_of_measurement_(unit_of_measurement), icon_(icon), expire_timeout_(1), value_(0), gain_(0), offset_(0) {}
 
 void Sensor::SetExpireTimeout(const std::chrono::seconds &timeout)
 {
@@ -15,9 +15,21 @@ void Sensor::SetExpireTimeout(const std::chrono::seconds &timeout)
 
 void Sensor::SetValue(float value, size_t decimal_precision)
 {
+    if (gain_ != 0)
+    {
+        value = value * gain_ + offset_;
+    }
+
     String value_string(value, decimal_precision);
     value_string.trim();
     value_ = value_string;
+}
+
+void Sensor::SetCalibration(float measurement_low, float measurement_high, float expected_low, float expected_high)
+{
+    gain_ = (expected_high - expected_low) / (measurement_high - measurement_low);
+    offset_ = expected_low - measurement_low * gain_;
+    logger_.LogInfo("Calibrated: gain=%f offset=%f", gain_, offset_);
 }
 
 String Sensor::GetConfigPayload() const

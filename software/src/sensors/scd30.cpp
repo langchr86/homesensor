@@ -5,6 +5,7 @@ Scd30::Scd30(ADC *adc, TwoWire *wire, Connection *connection, const char *readab
 {
     ha_temperature_ = std::make_shared<Sensor>("Temperatur", "temperature", SensorDeviceClass::kTemperature, "°C");
     ha_temperature_->SetExpireTimeout(expire_timeout);
+    ha_temperature_->SetCalibration(4.4, 25.5, 3.2, 24.4);
     ha_device_->AddSensor(ha_temperature_);
 
     ha_humidity_ = std::make_shared<Sensor>("Feuchtigkeit", "humidity", SensorDeviceClass::kHumidity, "%");

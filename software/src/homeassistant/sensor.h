@@ -5,6 +5,7 @@
 #include <Arduino.h>
 
 #include "homeassistant/sensor_device_class.h"
+#include "utils/logger.h"
 
 class Sensor
 {
@@ -13,6 +14,7 @@ public:
 
     void SetExpireTimeout(const std::chrono::seconds &timeout);
     void SetValue(float value, size_t decimal_precision = 1);
+    void SetCalibration(float measurement_low, float measurement_high, float expected_low, float expected_high);
 
     String GetConfigPayload() const;
 
@@ -24,6 +26,8 @@ private:
     void SetDeviceInfo(const String &readable_name, const String &unique_id,
                        const String &device_model, const String &device_manufacturer, const String &device_state_topic);
 
+    Logger logger_;
+
     String readable_name_;
     String unique_id_;
     SensorDeviceClass device_class_;
@@ -32,6 +36,9 @@ private:
 
     std::chrono::seconds expire_timeout_;
     String value_;
+
+    float gain_;
+    float offset_;
 
     String device_readable_name_;
     String device_unique_id_;
