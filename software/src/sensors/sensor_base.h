@@ -23,7 +23,7 @@ public:
 
     bool LowPower() const override;
 
-    void SetDebugInfos(size_t boot_count, size_t failed_boots, size_t failed_consecutive_boots) override;
+    void SetDebugInfos(size_t boot_count, size_t failed_boots, std::chrono::seconds max_readout_interval) override;
 
 protected:
     virtual bool InternalPowerUp() = 0;
@@ -45,7 +45,7 @@ private:
     std::shared_ptr<Sensor> ha_battery_;
     std::shared_ptr<Sensor> ha_boot_count_;
     std::shared_ptr<Sensor> ha_failed_boots_;
-    std::shared_ptr<Sensor> ha_failed_consecutive_boots_;
+    std::shared_ptr<Sensor> ha_max_readout_interval_;
 
     float last_battery_level_;
 };

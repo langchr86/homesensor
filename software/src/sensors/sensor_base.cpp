@@ -23,9 +23,9 @@ SensorBase::SensorBase(ADC *adc, Connection *connection, const char *readable_na
     ha_failed_boots_->SetExpireTimeout(expire_timeout);
     ha_device_->AddSensor(ha_failed_boots_);
 
-    ha_failed_consecutive_boots_ = std::make_shared<Sensor>("failed_consecutive_boots", "failed_consecutive_boots", SensorDeviceClass::kNone, "", "mdi:bell-sleep");
-    ha_failed_consecutive_boots_->SetExpireTimeout(expire_timeout);
-    ha_device_->AddSensor(ha_failed_consecutive_boots_);
+    ha_max_readout_interval_ = std::make_shared<Sensor>("max_readout_interval", "max_readout_interval", SensorDeviceClass::kNone, "s", "mdi:bell-sleep");
+    ha_max_readout_interval_->SetExpireTimeout(expire_timeout);
+    ha_device_->AddSensor(ha_max_readout_interval_);
 }
 
 bool SensorBase::SendHomeassistantConfig()
@@ -96,11 +96,11 @@ bool SensorBase::LowPower() const
     return last_battery_level_ < 10;
 }
 
-void SensorBase::SetDebugInfos(size_t boot_count, size_t failed_boots, size_t failed_consecutive_boots)
+void SensorBase::SetDebugInfos(size_t boot_count, size_t failed_boots, std::chrono::seconds max_readout_interval)
 {
     ha_boot_count_->SetValue(boot_count, 0);
     ha_failed_boots_->SetValue(failed_boots, 0);
-    ha_failed_consecutive_boots_->SetValue(failed_consecutive_boots, 0);
+    ha_max_readout_interval_->SetValue(max_readout_interval.count(), 0);
 }
 
 void SensorBase::BatteryLoop()

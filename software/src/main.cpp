@@ -15,7 +15,8 @@ std::shared_ptr<SensorInterface> sensor = nullptr;
 RTC_DATA_ATTR size_t boot_count = 0;
 RTC_DATA_ATTR size_t failed_boot_count = 0;
 RTC_DATA_ATTR size_t failed_consecutive_boots = 0;
-RTC_DATA_ATTR std::chrono::seconds read_out_interval = kDefaultReadOutInterval;
+RTC_DATA_ATTR std::chrono::seconds readout_interval = kDefaultReadoutInterval;
+RTC_DATA_ATTR std::chrono::seconds max_readout_interval = readout_interval;
 
 bool InitWire(Logger *logger, TwoWire *wire)
 {
@@ -34,11 +35,11 @@ void Sleep(Power *power, Logger *logger)
   if (sensor->LowPower())
   {
     logger->LogWarning("Force kMaxReadOutInterval because of low power");
-    power->DeepSleepNow(kMaxReadOutInterval);
+    power->DeepSleepNow(kMaxReadoutInterval);
   }
   else
   {
-    power->DeepSleepNow(read_out_interval);
+    power->DeepSleepNow(readout_interval);
   }
 }
 
@@ -55,15 +56,20 @@ void ErrorHappened(Connection *connection, Power *power, Logger *logger)
 
   if (failed_consecutive_boots > 3)
   {
-    read_out_interval *= 2;
+    readout_interval *= 2;
     failed_consecutive_boots = 0;
 
-    if (read_out_interval > kMaxReadOutInterval)
+    if (readout_interval > kMaxReadoutInterval)
     {
-      read_out_interval = kMaxReadOutInterval;
+      readout_interval = kMaxReadoutInterval;
     }
 
-    logger->LogInfo("Increased read out interval to %u seconds", static_cast<int>(read_out_interval.count()));
+    if (max_readout_interval < readout_interval)
+    {
+      max_readout_interval = readout_interval;
+    }
+
+    logger->LogInfo("Increased read out interval to %u seconds", static_cast<int>(readout_interval.count()));
   }
 
   Sleep(power, logger);
@@ -72,7 +78,7 @@ void ErrorHappened(Connection *connection, Power *power, Logger *logger)
 void EndWithNoError(Connection *connection, Power *power, Logger *logger)
 {
   failed_consecutive_boots = 0;
-  read_out_interval = kDefaultReadOutInterval;
+  readout_interval = kDefaultReadoutInterval;
   connection->Disconnect();
   Sleep(power, logger);
 }
@@ -102,8 +108,8 @@ void setup()
 
   Connection connection(kHomeAssistantIp, kMqttPort, kGatewayIp, kSubnetMask, kMqttMaxMessageSize);
 
-  const std::chrono::seconds expire_timeout(3 * kDefaultReadOutInterval);
-  DeviceFactory factory(read_out_interval, expire_timeout);
+  const std::chrono::seconds expire_timeout(3 * kDefaultReadoutInterval);
+  DeviceFactory factory(readout_interval, expire_timeout);
 
   sensor = factory.CreateDevice(config[kDeviceConfigIndex], &adc, wire, &connection);
 
@@ -121,7 +127,7 @@ void setup()
   }
   logger.LogDebug("Success: sensor.SensorReadLoop");
 
-  sensor->SetDebugInfos(boot_count, failed_boot_count, failed_consecutive_boots);
+  sensor->SetDebugInfos(boot_count, failed_boot_count, max_readout_interval);
 
   if (connection.Init() == false)
   {
