@@ -8,7 +8,7 @@ An Arduino library for the Sensirion SHTC3 humidity and temerature sensor
 #define SF_SHTC3
 
 #include <Arduino.h>
-#include <Wire.h>
+#include <SoftWire.h>
 
 #define SHTC3_ADDR_7BIT 0b1110000
 #define SHTC3_ADDR_WRITE 0b11100000

@@ -78,9 +78,9 @@
  * A port of the ESP8266 I2C has been done to support this
  */
 #if defined(ARDUINO_ARCH_ESP32)
-#include <SoftWire/SoftWire.h>
+#include <SoftWire.h>
 #else
-#include <Wire.h>
+#error Does no longer work for other platforms
 #endif
 
 //The default I2C address for the SCD30 is 0x61.
