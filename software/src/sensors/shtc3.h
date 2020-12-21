@@ -4,7 +4,8 @@
 #include <memory>
 
 #include <Arduino.h>
-#include <Wire.h>
+
+#include <SoftWire.h>
 
 #include <SparkFun_SHTC3.h>
 

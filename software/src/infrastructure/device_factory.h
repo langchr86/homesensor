@@ -4,7 +4,7 @@
 #include <memory>
 
 #include <Arduino.h>
-#include <Wire.h>
+#include <SoftWire.h>
 
 #include "infrastructure/device_config.h"
 #include "sensors/sensor_interface.h"

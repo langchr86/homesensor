@@ -4,9 +4,10 @@
 #include <memory>
 
 #include <Arduino.h>
-#include <Wire.h>
 
-#include <SparkFun_SCD30_Arduino_Library.h>
+#include <SoftWire.h>
+
+#include <paulvha_SCD30.h>
 
 #include "communication/connection.h"
 #include "homeassistant/sensor_device.h"

@@ -1,5 +1,6 @@
 #include <Arduino.h>
-#include <Wire.h>
+
+#include <SoftWire.h>
 
 #include "communication/connection.h"
 #include "infrastructure/device_factory.h"
@@ -21,11 +22,7 @@ RTC_DATA_ATTR std::chrono::seconds max_readout_interval = readout_interval;
 
 bool InitWire(Logger *logger, TwoWire *wire)
 {
-  if (wire->begin() == false)
-  {
-    logger->LogError("Failed to setup i2C");
-    return false;
-  }
+  wire->begin();
   wire->setClock(kWireSpeedHz);
 
   return true;
