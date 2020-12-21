@@ -62,22 +62,16 @@ bool Shtc3::InternalSensorRead()
     if (device_.passRHcrc == false)
     {
         logger_.LogError("Sensor CRC failed: Humidity");
-        ha_humidity_->SetValue(0, 0);
+        return false;
     }
-    else
-    {
-        ha_humidity_->SetValue(device_.toPercent(), 0);
-    }
-
     if (device_.passTcrc == false)
     {
         logger_.LogError("Sensor CRC failed: Temperature");
-        ha_temperature_->SetValue(0);
+        return false;
     }
-    else
-    {
-        ha_temperature_->SetValue(device_.toDegC());
-    }
+
+    ha_humidity_->SetValue(device_.toPercent(), 0);
+    ha_temperature_->SetValue(device_.toDegC());
     return true;
 }
 
