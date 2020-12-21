@@ -20,6 +20,8 @@ bool Shtc3::HardwareInitialization(const std::chrono::seconds &readout_interval)
 
 bool Shtc3::InternalPowerUp()
 {
+    wire_->setClockStretchLimit(200000);
+
     if (device_.begin(*wire_) != SHTC3_Status_Nominal)
     {
         logger_.LogError("Failed to setup wire connection to sensor");
