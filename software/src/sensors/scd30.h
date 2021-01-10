@@ -44,4 +44,6 @@ private:
     std::shared_ptr<Sensor> ha_temperature_;
     std::shared_ptr<Sensor> ha_humidity_;
     std::shared_ptr<Sensor> ha_co2_;
+
+    std::chrono::seconds readout_interval_;
 };

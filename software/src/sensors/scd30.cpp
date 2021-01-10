@@ -19,6 +19,8 @@ Scd30::Scd30(ADC *adc, TwoWire *wire, Connection *connection, Power *power, cons
 
 bool Scd30::HardwareInitialization(const std::chrono::seconds &readout_interval)
 {
+    readout_interval_ = readout_interval;
+
     power_->LightSleepNow(kHardwareStartupDuration);
     logger_.LogDebug("SCD30 should now be booted and should respond");
 
@@ -85,7 +87,7 @@ bool Scd30::InternalPowerUp()
 
 bool Scd30::InternalSensorMeasurement()
 {
-    return WaitForDataAvailable();
+    return WaitForDataAvailable(readout_interval_);
 }
 
 void Scd30::InternalPowerSave()
