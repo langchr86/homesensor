@@ -48,7 +48,6 @@ void ErrorHappened(Connection *connection, Power *power, Logger *logger)
     connection->Disconnect();
   }
 
-  Led::FlashFor();
   failed_boot_count++;
   failed_consecutive_boots++;
 
@@ -124,6 +123,7 @@ void setup()
       ErrorHappened(&connection, &power, &logger);
     }
     sensor_hardware_initialized = true;
+    Led::FlashFor();
     logger.LogDebug("Success: sensor.HardwareInitialization");
   }
 
