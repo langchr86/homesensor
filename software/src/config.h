@@ -10,7 +10,7 @@
 
 static constexpr size_t kWireSpeedHz = 100000;
 
-static constexpr std::chrono::seconds kDefaultReadoutInterval = std::chrono::minutes(1);
+static constexpr std::chrono::seconds kDefaultReadoutInterval = std::chrono::minutes(2);
 static constexpr std::chrono::seconds kMaxReadoutInterval = std::chrono::minutes(30);
 static_assert(kMaxReadoutInterval > kDefaultReadoutInterval, "kMaxReadoutInterval needs to be bigger then kDefaultReadoutInterval");
 
