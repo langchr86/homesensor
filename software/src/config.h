@@ -30,10 +30,9 @@ static const DeviceConfig config[] = {
     DeviceConfig(DeviceType::kShtc3, IPAddress(192, 168, 0, 11), "Balkon", "balkon"),
     DeviceConfig(DeviceType::kShtc3, IPAddress(192, 168, 0, 12), "Front", "front"),
     DeviceConfig(DeviceType::kScd30, IPAddress(192, 168, 0, 13), "Wohnen", "wohnen"),
-    DeviceConfig(DeviceType::kScd30, IPAddress(192, 168, 0, 14), "Büro", "buro"),
+    DeviceConfig(DeviceType::kScd30, IPAddress(192, 168, 0, 14), "Büro", "buero"),
     DeviceConfig(DeviceType::kScd30, IPAddress(192, 168, 0, 15), "Schlafen", "schlafen"),
-    DeviceConfig(DeviceType::kScd30, IPAddress(192, 168, 0, 16), "Freizeit", "freizeit"),
-    DeviceConfig(DeviceType::kScd30, IPAddress(192, 168, 0, 17), "Sport", "sport"),
+    DeviceConfig(DeviceType::kScd30, IPAddress(192, 168, 0, 16), "Gang", "gang"),
 };
 
 static constexpr size_t kDeviceConfigIndex = 0;
