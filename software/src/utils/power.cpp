@@ -3,8 +3,6 @@
 #include <Esp.h>
 #include <esp_sleep.h>
 
-#include "utils/led.h"
-
 Power::Power() : logger_("Power") {}
 
 void Power::SetOption(esp_sleep_pd_domain_t domain, esp_sleep_pd_option_t option)
@@ -52,6 +50,6 @@ void Power::Reboot()
 {
     const auto kWaitBeforeReboot = std::chrono::seconds(3);
     logger_.LogWarning("Restarting in %u seconds", static_cast<int>(kWaitBeforeReboot.count()));
-    Led::FlashFor(kWaitBeforeReboot);
+    LightSleepNow(kWaitBeforeReboot);
     ESP.restart();
 }
