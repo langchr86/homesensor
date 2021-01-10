@@ -36,7 +36,7 @@ bool Scd30::HardwareInitialization(const std::chrono::seconds &readout_interval)
     }
     logger_.LogDebug("Stopped measurement");
 
-    if (device_.setAutoSelfCalibration(false) == false)
+    if (device_.setAutoSelfCalibration(true) == false)
     {
         logger_.LogError("Failed to disable ASC");
         return false;
