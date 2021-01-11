@@ -42,9 +42,24 @@ See the linked sub-pages for further instructions.
 Usage
 -----
 
-TBD
+<p float="left">
+<img src="images/screenshot_01.png" width="30%">
+<img src="images/screenshot_02.png" width="30%">
+<img src="images/screenshot_03.png" width="30%">
+</p>
 
-* Images
+
+### Indoor - SCD30
+
+<p float="left">
+<img src="hardware/images/scd30_12_placed.jpg" width="30%">
+<img src="hardware/images/scd30_15_case_closed.jpg" width="30%">
+</p>
+
+
+### Outdoor - SHTC3
+
+TBD
 
 
 
