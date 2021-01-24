@@ -2,29 +2,24 @@
 
 #include "battery_calculation.h"
 
-SensorBase::SensorBase(ADC *adc, Connection *connection, Power *power, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout, const char *sensor_name)
+SensorBase::SensorBase(ADC *adc, Connection *connection, Power *power, const char *readable_name, const char *unique_id, const char *sensor_name)
     : logger_(sensor_name), connection_(connection), power_(power), adc_(adc), last_battery_level_(100)
 {
     ha_device_ = std::make_shared<SensorDevice>(readable_name, unique_id, "firebeetle32", "espressif");
 
     ha_voltage_ = std::make_shared<Sensor>("Akkuspannung", "voltage", SensorDeviceClass::kNone, "V", "mdi:battery-heart-variant");
-    ha_voltage_->SetExpireTimeout(expire_timeout);
     ha_device_->AddSensor(ha_voltage_);
 
     ha_battery_ = std::make_shared<Sensor>("Akkukapazität", "capacity", SensorDeviceClass::kBattery, "%");
-    ha_battery_->SetExpireTimeout(expire_timeout);
     ha_device_->AddSensor(ha_battery_);
 
     ha_boot_count_ = std::make_shared<Sensor>("boot_count", "boot_count", SensorDeviceClass::kNone, "", "mdi:bell-check");
-    ha_boot_count_->SetExpireTimeout(expire_timeout);
     ha_device_->AddSensor(ha_boot_count_);
 
     ha_failed_boots_ = std::make_shared<Sensor>("failed_boots", "failed_boots", SensorDeviceClass::kNone, "", "mdi:bell-cancel");
-    ha_failed_boots_->SetExpireTimeout(expire_timeout);
     ha_device_->AddSensor(ha_failed_boots_);
 
     ha_max_readout_interval_ = std::make_shared<Sensor>("max_readout_interval", "max_readout_interval", SensorDeviceClass::kNone, "s", "mdi:bell-sleep");
-    ha_max_readout_interval_->SetExpireTimeout(expire_timeout);
     ha_device_->AddSensor(ha_max_readout_interval_);
 }
 

@@ -6,7 +6,7 @@ static constexpr char kDeviceJsonObjectName[] = "device";
 
 Sensor::Sensor(const String &readable_name, const String &unique_id, SensorDeviceClass device_class, const String &unit_of_measurement, const String &icon)
     : logger_(unique_id.c_str()), readable_name_(readable_name), unique_id_(unique_id),
-      device_class_(device_class), unit_of_measurement_(unit_of_measurement), icon_(icon), expire_timeout_(1), value_(0), gain_(0), offset_(0) {}
+      device_class_(device_class), unit_of_measurement_(unit_of_measurement), icon_(icon), expire_timeout_(0), value_(0), gain_(0), offset_(0) {}
 
 void Sensor::SetExpireTimeout(const std::chrono::seconds &timeout)
 {
@@ -53,8 +53,10 @@ String Sensor::GetConfigPayload() const
     {
         json["icon"] = icon_;
     }
-
-    json["expire_after"] = static_cast<uint32_t>(expire_timeout_.count());
+    if (expire_timeout_ != std::chrono::seconds::zero())
+    {
+        json["expire_after"] = static_cast<uint32_t>(expire_timeout_.count());
+    }
 
     auto device_json = json.createNestedObject(kDeviceJsonObjectName);
     device_json["name"] = device_readable_name_;

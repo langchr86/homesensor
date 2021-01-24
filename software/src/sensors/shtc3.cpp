@@ -1,7 +1,7 @@
 #include "shtc3.h"
 
 Shtc3::Shtc3(ADC *adc, TwoWire *wire, Connection *connection, Power *power, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout)
-    : SensorBase(adc, connection, power, readable_name, unique_id, expire_timeout, "SHTC3"), wire_(wire)
+    : SensorBase(adc, connection, power, readable_name, unique_id, "SHTC3"), wire_(wire)
 {
     ha_temperature_ = std::make_shared<Sensor>("Temperatur", "temperature", SensorDeviceClass::kTemperature, "°C");
     ha_temperature_->SetExpireTimeout(expire_timeout);

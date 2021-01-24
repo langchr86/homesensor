@@ -15,7 +15,7 @@
 class SensorBase : public SensorInterface
 {
 public:
-    SensorBase(ADC *adc, Connection *connection, Power *power, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout, const char *sensor_name);
+    SensorBase(ADC *adc, Connection *connection, Power *power, const char *readable_name, const char *unique_id, const char *sensor_name);
 
     bool SendHomeassistantConfig() override;
     bool SendHomeassistantState() override;
