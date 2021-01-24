@@ -59,7 +59,11 @@ Usage
 
 ### Outdoor - SHTC3
 
-TBD
+<p float="left">
+<img src="hardware/case_outdoor/images/Entwurf-1.1a.png" width="40%">
+<img src="hardware/case_outdoor/images/Entwurf-1.1c.png" width="15%">
+<img src="hardware/case_outdoor/images/Entwurf-1.1e.png" width="40%">
+</p>
 
 
 
@@ -85,3 +89,10 @@ Author Information
 Christian Lang
 
 [lang.chr86@gmail.com](mailto:lang.chr86@gmail.com)
+
+
+
+Credits
+-------
+
+* 3D printed Case: [langdesign.ch](https://langdesign.ch/)

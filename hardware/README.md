@@ -86,6 +86,31 @@ you have to remove it from the Adafruit board.
 
 <img src="images/shtc3_led.jpg" width="30%">
 
-TBD:
+**ToDo: cabling/images**
 
-* use direct 3.3V in
+We use a 3D printed case for the outdoor sensor
+because of the weather influence.
+
+<p float="left">
+<img src="case_outdoor/images/Entwurf-1.1a.png" width="40%">
+<img src="case_outdoor/images/Entwurf-1.1c.png" width="15%">
+<img src="case_outdoor/images/Entwurf-1.1e.png" width="40%">
+</p>
+
+**Not yet printed/tested**
+
+**Images are no longer up-to-date with the real model data. Will be updated after real printing test.**
+
+The corresponding files are located under `case_outdoor/`.
+To ensure longevity of the screw holes we use special plastic screws.
+More information for those
+[SCHRIEVER STS Senkkopf Schrauben T KN 1041 Stahl znb 1227](https://www.sfs.ch/de/Befestigungstechnik/Blech-%2C-Bohr-%2C-Gewindefurchschrauben/Gewindefurchende-und-gewindeschneidende-Schrauben/Gewindefurchschrauben-f%C3%BCr-Kunststoff/SCHRIEVER-STS-Senkkopf-Schrauben-T-KN-1041-Stahl-znb/p/S010603_0880?sourceCategory=su_m_10-15-030-10&q=%3Arelevance%3Asu_c_10-15-030-10_su_21142_facet%3ASenkkopf)
+can be found in the datasheet in the top level `documents` folder.
+
+~~~~~~
+d1 = 2.2
+d2 = 3.8
+t = 6
+Antrieb = T6
+Löcher = 1.85
+~~~~~~
