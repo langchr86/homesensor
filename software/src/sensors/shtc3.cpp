@@ -18,6 +18,11 @@ bool Shtc3::HardwareInitialization(const std::chrono::seconds &readout_interval)
     return true;
 }
 
+bool Shtc3::ForceCalibrationNow()
+{
+    return true;
+}
+
 bool Shtc3::InternalPowerUp()
 {
     wire_->setClockStretchLimit(200000);

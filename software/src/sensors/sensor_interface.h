@@ -11,6 +11,7 @@ public:
     virtual bool SendHomeassistantState() = 0;
 
     virtual bool HardwareInitialization(const std::chrono::seconds &readout_interval) = 0;
+    virtual bool ForceCalibrationNow() = 0;
     virtual bool SensorReadLoop() = 0;
     virtual bool LowPower() const = 0;
 

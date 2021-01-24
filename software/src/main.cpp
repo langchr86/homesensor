@@ -22,6 +22,9 @@ RTC_DATA_ATTR size_t failed_consecutive_boots = 0;
 RTC_DATA_ATTR std::chrono::seconds readout_interval = kDefaultReadoutInterval;
 RTC_DATA_ATTR std::chrono::seconds max_readout_interval = readout_interval;
 
+RTC_DATA_ATTR bool calibration_active = false;
+RTC_DATA_ATTR std::chrono::seconds remaining_calibration_time;
+
 bool InitWire(Logger *logger, TwoWire *wire)
 {
   wire->begin();
@@ -93,6 +96,21 @@ void setup()
   Logger logger("Main");
   logger.SetMaxLevel(LOG_INFO);
 
+  static constexpr uint8_t kCalibrationPin = GPIO_NUM_4;
+  static constexpr std::chrono::seconds kMinCalibrationTime = std::chrono::minutes(10);
+  pinMode(kCalibrationPin, INPUT_PULLUP);
+  if (boot_count == 1 && digitalRead(kCalibrationPin) == LOW)
+  {
+    calibration_active = true;
+    remaining_calibration_time = 10 * kDefaultReadoutInterval;
+    if (remaining_calibration_time < kMinCalibrationTime)
+    {
+      remaining_calibration_time = kMinCalibrationTime;
+    }
+    logger.LogDebug("Initialized sensor calibration");
+    Led::FlashFor(std::chrono::seconds(4), std::chrono::seconds(1));
+  }
+
   auto *wire = &Wire;
   if (InitWire(&logger, wire) == false)
   {
@@ -129,6 +147,23 @@ void setup()
     sensor_hardware_initialized = true;
     Led::FlashFor();
     logger.LogDebug("Success: sensor.HardwareInitialization");
+  }
+
+  if (calibration_active && remaining_calibration_time <= std::chrono::seconds::zero())
+  {
+    calibration_active = false;
+    if (sensor->ForceCalibrationNow() == false)
+    {
+      logger.LogError("Sensor calibration failed");
+      ErrorHappened(&connection, &power, &logger);
+    }
+    logger.LogDebug("Success: sensor.ForceCalibrationNow");
+  }
+
+  if (calibration_active)
+  {
+    mode += "+calib";
+    remaining_calibration_time -= kDefaultReadoutInterval;
   }
 
   if (sensor->SensorReadLoop() == false)

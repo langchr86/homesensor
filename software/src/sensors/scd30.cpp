@@ -35,9 +35,9 @@ bool Scd30::HardwareInitialization(const std::chrono::seconds &readout_interval)
     }
     logger_.LogDebug("Stopped measurement");
 
-    if (device_.setAutoSelfCalibration(true) == false)
+    if (device_.setAutoSelfCalibration(false) == false)
     {
-        logger_.LogError("Failed to disable ASC");
+        logger_.LogError("Failed to set ASC");
         return false;
     }
 
@@ -76,6 +76,25 @@ bool Scd30::HardwareInitialization(const std::chrono::seconds &readout_interval)
     }
     logger_.LogDebug("Changed to real readout interval");
 
+    return true;
+}
+
+bool Scd30::ForceCalibrationNow()
+{
+    if (InternalPowerUp() == false)
+    {
+        logger_.LogError("Failed to wake up sensor");
+        return false;
+    }
+
+    if (ForceRecalibrationValue() == false)
+    {
+        logger_.LogError("Failed to calibrate sensor");
+        return false;
+    }
+
+    InternalPowerSave();
+    InternalPowerDown();
     return true;
 }
 
@@ -131,7 +150,8 @@ bool Scd30::WaitForDataAvailable(const std::chrono::milliseconds &timeout)
     return true;
 }
 
-bool Scd30::ForceRecalibrationvalue()
+bool Scd30::ForceRecalibrationValue()
 {
+    logger_.LogError("Try to calibrate CO2 sensor to fresh air value of 400ppm");
     return device_.setForceRecalibration(kFreshAirReferencePpm);
 }

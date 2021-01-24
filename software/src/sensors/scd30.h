@@ -25,6 +25,7 @@ public:
     Scd30(ADC *adc, TwoWire *wire, Connection *connection, Power *power, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout);
 
     bool HardwareInitialization(const std::chrono::seconds &readout_interval) override;
+    bool ForceCalibrationNow() override;
 
 private:
     bool InternalPowerUp() override;
@@ -36,7 +37,7 @@ private:
 private:
     bool Connect();
     bool WaitForDataAvailable(const std::chrono::milliseconds &timeout = kMinReadoutInterval);
-    bool ForceRecalibrationvalue();
+    bool ForceRecalibrationValue();
 
     SCD30 device_;
     TwoWire *wire_;

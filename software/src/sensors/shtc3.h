@@ -20,6 +20,7 @@ public:
     Shtc3(ADC *adc, TwoWire *wire, Connection *connection, Power *power, const char *readable_name, const char *unique_id, const std::chrono::seconds &expire_timeout);
 
     bool HardwareInitialization(const std::chrono::seconds &readout_interval) override;
+    bool ForceCalibrationNow() override;
 
 private:
     bool InternalPowerUp() override;
