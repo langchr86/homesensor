@@ -5,7 +5,6 @@ Scd30::Scd30(ADC *adc, TwoWire *wire, Connection *connection, Power *power, cons
 {
     ha_temperature_ = std::make_shared<Sensor>("Temperatur", "temperature", SensorDeviceClass::kTemperature, "°C");
     ha_temperature_->SetExpireTimeout(expire_timeout);
-    ha_temperature_->SetCalibration(4.4, 25.5, 3.2, 24.4);
     ha_device_->AddSensor(ha_temperature_);
 
     ha_humidity_ = std::make_shared<Sensor>("Feuchtigkeit", "humidity", SensorDeviceClass::kHumidity, "%");
@@ -43,9 +42,9 @@ bool Scd30::HardwareInitialization(const std::chrono::seconds &readout_interval)
     }
 
     // temperature calibration is done by Sensor::SetCalibration
-    if (device_.setTemperatureOffset(0.0f) == false)
+    if (device_.setTemperatureOffset(1.2f) == false)
     {
-        logger_.LogError("Failed to disable temperature offset");
+        logger_.LogError("Failed to set temperature offset");
         return false;
     }
 
