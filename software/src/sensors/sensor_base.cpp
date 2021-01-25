@@ -13,6 +13,9 @@ SensorBase::SensorBase(ADC *adc, Connection *connection, Power *power, const cha
     ha_battery_ = std::make_shared<Sensor>("Akkukapazität", "capacity", SensorDeviceClass::kBattery, "%");
     ha_device_->AddSensor(ha_battery_);
 
+    ha_mode_ = std::make_shared<Sensor>("mode", "mode", SensorDeviceClass::kNone, "", "mdi:message-bulleted");
+    ha_device_->AddSensor(ha_mode_);
+
     ha_boot_count_ = std::make_shared<Sensor>("boot_count", "boot_count", SensorDeviceClass::kNone, "", "mdi:bell-check");
     ha_device_->AddSensor(ha_boot_count_);
 
@@ -91,8 +94,11 @@ bool SensorBase::LowPower() const
     return last_battery_level_ < 10;
 }
 
-void SensorBase::SetDebugInfos(size_t boot_count, size_t failed_boots, std::chrono::seconds max_readout_interval)
+void SensorBase::SetDebugInfos(const char *mode, size_t boot_count, size_t failed_boots, std::chrono::seconds max_readout_interval)
 {
+    logger_.LogInfo("mode=%s", mode);
+    ha_mode_->SetValue(mode);
+
     logger_.LogInfo("boot_count=%u", boot_count);
     ha_boot_count_->SetValue(boot_count, 0);
 

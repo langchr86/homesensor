@@ -13,6 +13,7 @@ public:
     Sensor(const String &readable_name, const String &unique_id, SensorDeviceClass device_class, const String &unit_of_measurement = "", const String &icon = "");
 
     void SetExpireTimeout(const std::chrono::seconds &timeout);
+    void SetValue(String value_string);
     void SetValue(float value, size_t decimal_precision = 1);
     void SetCalibration(float measurement_low, float measurement_high, float expected_low, float expected_high);
 

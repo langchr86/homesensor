@@ -1,3 +1,5 @@
+#include <string>
+
 #include <Arduino.h>
 
 #include <SoftWire.h>
@@ -83,6 +85,7 @@ void EndWithNoError(Connection *connection, Power *power, Logger *logger)
 void setup()
 {
   boot_count++;
+  std::string mode = "norm";
 
   Led::Disable();
   Power power;
@@ -117,6 +120,7 @@ void setup()
 
   if (sensor_hardware_initialized == false)
   {
+    mode += "+hwinit";
     if (sensor->HardwareInitialization(kDefaultReadoutInterval) == false)
     {
       logger.LogError("Sensor hardware initialization failed");
@@ -134,7 +138,7 @@ void setup()
   }
   logger.LogDebug("Success: sensor.SensorReadLoop");
 
-  sensor->SetDebugInfos(boot_count, failed_boot_count, max_readout_interval);
+  sensor->SetDebugInfos(mode.c_str(), boot_count, failed_boot_count, max_readout_interval);
 
   if (connection.Init() == false)
   {

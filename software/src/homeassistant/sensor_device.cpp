@@ -31,7 +31,7 @@ std::vector<MqttMessage> SensorDevice::GetAllConfigMessages() const
 
 MqttMessage SensorDevice::GetStateMessage() const
 {
-    StaticJsonDocument<JSON_OBJECT_SIZE(16)> json;
+    StaticJsonDocument<JSON_OBJECT_SIZE(20)> json;
     for (const auto &sensor : sensors_)
     {
         json[sensor->GetUniqueId()] = sensor->GetStateValue();

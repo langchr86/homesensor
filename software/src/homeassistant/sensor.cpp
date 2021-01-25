@@ -13,6 +13,12 @@ void Sensor::SetExpireTimeout(const std::chrono::seconds &timeout)
     expire_timeout_ = timeout;
 }
 
+void Sensor::SetValue(String value_string)
+{
+    value_string.trim();
+    value_ = value_string;
+}
+
 void Sensor::SetValue(float value, size_t decimal_precision)
 {
     if (gain_ != 0)
@@ -21,8 +27,7 @@ void Sensor::SetValue(float value, size_t decimal_precision)
     }
 
     String value_string(value, decimal_precision);
-    value_string.trim();
-    value_ = value_string;
+    SetValue(value_string);
 }
 
 void Sensor::SetCalibration(float measurement_low, float measurement_high, float expected_low, float expected_high)
