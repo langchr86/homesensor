@@ -94,7 +94,7 @@ void setup()
   Power power;
 
   Logger logger("Main");
-  logger.SetMaxLevel(LOG_INFO);
+  logger.SetMaxLevel(LOG_DEBUG);
 
   static constexpr uint8_t kCalibrationPin = GPIO_NUM_4;
   static constexpr std::chrono::seconds kMinCalibrationTime = std::chrono::minutes(10);
