@@ -77,7 +77,7 @@ bool Shtc3::InternalSensorRead()
         return false;
     }
 
-    ha_humidity_->SetValue(device_.toPercent(), 0);
+    ha_humidity_->SetValue(device_.toPercent());
     ha_temperature_->SetValue(device_.toDegC());
     return true;
 }

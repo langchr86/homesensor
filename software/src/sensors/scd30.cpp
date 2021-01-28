@@ -114,7 +114,7 @@ void Scd30::InternalPowerSave()
 
 bool Scd30::InternalSensorRead()
 {
-    ha_humidity_->SetValue(device_.getHumidity(), 0);
+    ha_humidity_->SetValue(device_.getHumidity());
     ha_temperature_->SetValue(device_.getTemperature());
     ha_co2_->SetValue(device_.getCO2(), 0);
 
