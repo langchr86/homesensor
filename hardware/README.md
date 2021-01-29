@@ -28,6 +28,17 @@ Those are the `R10` and `R11` on the board.
 
 
 
+Battery
+-------
+
+A li-ion battery is used as power source for the device.
+The intergrated charge circuit does charge to a fixed voltage of 4.2 V.
+This may be too much for usual li-ion cells.
+Ensure that you use a battery that is not damaged by this higher voltage
+or even use a more compatible lipo battery.
+
+
+
 Indoor sensor
 -------------
 
