@@ -8,7 +8,8 @@
 
 #include "utils/system_time.h"
 
-#define LOG_DISABLE
+// TODO(clang): Why do we need the logger enabled to have a stable readout loop?
+// #define LOG_DISABLE
 
 enum Severity
 {
