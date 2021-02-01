@@ -101,6 +101,8 @@ you have to remove it from the Adafruit board.
 
 We use a 3D printed case for the outdoor sensor
 because of the weather influence.
+The case is designed for 0.2mm nozzle diammeter and PLA.
+Usually temperature sensors have white or other light colored cases.
 
 <p float="left">
 <img src="case_outdoor/images/Entwurf-1.1a.png" width="40%">
