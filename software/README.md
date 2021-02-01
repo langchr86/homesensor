@@ -13,6 +13,9 @@ After the installation of the IDE the project should be cloned with git.
 Open the sub folder `software` in vscode.
 Now you start compilation and flashing with the control elements in the bottom status line of vscode.
 
+If the serial adapter of the ESP is not detected you may need the corresponding driver.
+Usually the one in the `driver` subfolder is working on Windows 10.
+
 
 
 Configuration
