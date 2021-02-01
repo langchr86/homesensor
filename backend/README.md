@@ -11,6 +11,22 @@ In addition a `Vagrantfile` is provided that setups a virtualbox VM for developm
 Setup on existing server
 ------------------------
 
+First we have to ensure that ansible is installed.
+
+~~~~~~
+apt install ansible
+
+# or
+apt install software-properties-common
+apt-add-repository ppa:ansible/ansible
+apt update
+apt install git ansible
+
+# or
+apt install python3-pip
+pip3 install ansible
+~~~~~~
+
 For the real installation you need a linux server that has a running `docker-compose` installation.
 You can either use the existing role to install `dockerce` / `dockerio`
 or install with your package manager e.g. `apt install docker.io docker-compose`
