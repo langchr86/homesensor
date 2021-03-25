@@ -14,7 +14,7 @@ services:
 
   mqtt:
     container_name: mosquitto
-    image: eclipse-mosquitto:latest
+    image: eclipse-mosquitto:1.6.14
     ports:
       - "1883:1883"
       - "9001:9001"
