@@ -90,3 +90,17 @@ after installing the `homeassistant` and `eclipse-mosquitto` (MQTT) container on
 
 Now you can flash your sensor boards.
 They should automatically appear as device/entity in your home assistant lovelace board.
+
+
+
+Additional home assistant configuration
+---------------------------------------
+
+As defined in the `docker-compose.yml` the home assistant configuration is mounted to the host file system.
+To configure home assistant manipulate the automatically created `configuration.yaml`.
+E.g. by changing the history duration from 10 (default) to 28 days:
+
+~~~~~~
+recorder:
+  purge_keep_days: 28
+~~~~~~
