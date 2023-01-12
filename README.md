@@ -24,6 +24,8 @@ But one part of automation is to collect data from sensors.
 We therefore use this mechanisms and the corresponding Web-GUI
 to have a flexible way to store and visualize the collected data.
 
+A very similar but more generic project is [ESPHome](https://esphome.io/)
+
 
 
 Getting started
