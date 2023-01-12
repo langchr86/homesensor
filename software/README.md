@@ -48,6 +48,8 @@ it should start to send messages after a few seconds to the home assistant serve
 A correct startup is visualized by fast blinking (500ms interval) blue LED after hardware initialization.
 Because the sensor devices use auto configuration
 they should automatically appear under `devices` in home assistant.
+Auto configuration happens at first start, after multiple consecutive failed boots
+or if configured with `kHaConfigInterval` in regular intervals.
 Then they can be used to setup data visualizations on `lovelace dashboards` in home assistant.
 
 <p float="left">

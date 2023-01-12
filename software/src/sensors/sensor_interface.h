@@ -15,5 +15,5 @@ public:
     virtual bool SensorReadLoop() = 0;
     virtual bool LowPower() const = 0;
 
-    virtual void SetDebugInfos(const char *mode, size_t boot_count, size_t failed_boots, std::chrono::seconds max_readout_interval) = 0;
+    virtual void SetDebugInfos(const char *mode, size_t boot_count, size_t failed_boots, std::chrono::seconds max_readout_interval, size_t ha_config_count) = 0;
 };

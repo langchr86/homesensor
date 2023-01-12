@@ -19,6 +19,7 @@ RTC_DATA_ATTR bool sensor_hardware_initialized = false;
 RTC_DATA_ATTR size_t boot_count = 0;
 RTC_DATA_ATTR size_t failed_boot_count = 0;
 RTC_DATA_ATTR size_t failed_consecutive_boots = 0;
+RTC_DATA_ATTR size_t ha_config_count = 1;
 RTC_DATA_ATTR std::chrono::seconds readout_interval = kDefaultReadoutInterval;
 RTC_DATA_ATTR std::chrono::seconds max_readout_interval = readout_interval;
 
@@ -173,7 +174,7 @@ void setup()
   }
   logger.LogDebug("Success: sensor.SensorReadLoop");
 
-  sensor->SetDebugInfos(mode.c_str(), boot_count, failed_boot_count, max_readout_interval);
+  sensor->SetDebugInfos(mode.c_str(), boot_count, failed_boot_count, max_readout_interval, ha_config_count);
 
   if (connection.Init() == false)
   {
@@ -187,13 +188,16 @@ void setup()
   }
   logger.LogDebug("Success: connection.Connect");
 
-  if (boot_count == 1 || failed_consecutive_boots > 0) // only send HA config at first boot or after failed boot
+  // only send HA config at first boot or after failed boot or in regular interval
+  if (boot_count == 1 || failed_consecutive_boots > 0 || (kHaConfigInterval != 0 && ha_config_count >= kHaConfigInterval))
   {
     if (sensor->SendHomeassistantConfig() == false)
     {
       ErrorHappened(&connection, &power, &logger);
     }
+    ha_config_count = 0;
   }
+  ha_config_count++;
 
   if (sensor->SendHomeassistantState() == false)
   {

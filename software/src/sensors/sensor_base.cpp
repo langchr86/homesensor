@@ -24,6 +24,9 @@ SensorBase::SensorBase(ADC *adc, Connection *connection, Power *power, const cha
 
     ha_max_readout_interval_ = std::make_shared<Sensor>("max_readout_interval", "max_readout_interval", SensorDeviceClass::kNone, "s", "mdi:bell-sleep");
     ha_device_->AddSensor(ha_max_readout_interval_);
+
+    ha_config_count_ = std::make_shared<Sensor>("ha_config_count", "ha_config_count", SensorDeviceClass::kNone, "", "mdi:bell-ring");
+    ha_device_->AddSensor(ha_config_count_);
 }
 
 bool SensorBase::SendHomeassistantConfig()
@@ -94,7 +97,7 @@ bool SensorBase::LowPower() const
     return last_battery_level_ < 10;
 }
 
-void SensorBase::SetDebugInfos(const char *mode, size_t boot_count, size_t failed_boots, std::chrono::seconds max_readout_interval)
+void SensorBase::SetDebugInfos(const char *mode, size_t boot_count, size_t failed_boots, std::chrono::seconds max_readout_interval, size_t ha_config_count)
 {
     logger_.LogInfo("mode=%s", mode);
     ha_mode_->SetValue(mode);
@@ -107,6 +110,9 @@ void SensorBase::SetDebugInfos(const char *mode, size_t boot_count, size_t faile
 
     logger_.LogInfo("max_readout_interval=%llus", max_readout_interval.count());
     ha_max_readout_interval_->SetValue(max_readout_interval.count(), 0);
+
+    logger_.LogInfo("ha_config_count=%u", ha_config_count);
+    ha_config_count_->SetValue(ha_config_count, 0);
 }
 
 void SensorBase::BatteryLoop()

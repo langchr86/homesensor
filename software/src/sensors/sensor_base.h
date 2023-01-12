@@ -23,7 +23,7 @@ public:
     bool SensorReadLoop() override;
     bool LowPower() const override;
 
-    void SetDebugInfos(const char *mode, size_t boot_count, size_t failed_boots, std::chrono::seconds max_readout_interval) override;
+    void SetDebugInfos(const char *mode, size_t boot_count, size_t failed_boots, std::chrono::seconds max_readout_interval, size_t ha_config_count) override;
 
 protected:
     virtual bool InternalPowerUp() = 0;
@@ -48,6 +48,7 @@ private:
     std::shared_ptr<Sensor> ha_boot_count_;
     std::shared_ptr<Sensor> ha_failed_boots_;
     std::shared_ptr<Sensor> ha_max_readout_interval_;
+    std::shared_ptr<Sensor> ha_config_count_;
 
     float last_battery_level_;
 };
