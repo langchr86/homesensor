@@ -41,7 +41,7 @@ String Sensor::GetConfigPayload() const
 {
     StaticJsonDocument<JSON_OBJECT_SIZE(64)> json;
 
-    json["name"] = device_readable_name_ + " " + readable_name_;
+    json["name"] = readable_name_;
     json["unique_id"] = device_unique_id_ + "_" + unique_id_;
     json["state_topic"] = device_state_topic_;
     json["value_template"] = "{{ value_json." + unique_id_ + " }}";
