@@ -45,6 +45,7 @@ String Sensor::GetConfigPayload() const
     json["unique_id"] = device_unique_id_ + "_" + unique_id_;
     json["state_topic"] = device_state_topic_;
     json["value_template"] = "{{ value_json." + unique_id_ + " }}";
+    json["state_class"] = "measurement";
 
     if (device_class_ != SensorDeviceClass::kNone)
     {
