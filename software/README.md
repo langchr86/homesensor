@@ -185,6 +185,17 @@ Calibration parameters are stored in the sensor itself and not in the ESP.
 Therefore even after powerloss or flashing of new software no recalibration is needed.
 
 
+### CO2 Autocalibration mode
+
+No manual calibration is needed if you operate the sensor in an environment with constant support of fresh air.
+The sensor datasheet explains this further:
+
+> The correct application of ASC requires the SCD30 to be regularly exposed to air with CO2 concentration = 400 ppm,
+> as is the case in well ventilated buildings over night without human presence.
+
+This `ASC` mode can be enabled by changing the parameter to the call of `setAutoSelfCalibration` to `true` (`src/sensors/scd30.cpp`).
+
+
 
 Development
 -----------
