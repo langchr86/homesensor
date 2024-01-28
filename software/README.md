@@ -25,7 +25,7 @@ The default state of the code will not work because it contains no credentials f
 and also the IPs should be changed in most cases.
 All those things that should/can be configured are contained in the file `src/config.h`.
 
-Things that almost always need to be adapted to the specific environment:
+Things that almost always need to be adapted to the specific environment are:
 
 * Wifi credentials
 * Home assistant IP
@@ -105,7 +105,7 @@ With those numbers we can approx. calculate a possible runtime with one battery 
 Measured runtime of sensors with readout interval of 2 minutes and a battery of 2500 mAh capacity are:
 
 * SCD30: 2 weeks
-* SHTC3: more then 1 month
+* SHTC3: more than 1 month
 
 
 ### Increase readout interval during problems
@@ -166,7 +166,7 @@ and the sensor should be placed in fresh air that has usually normal CO2 concent
 The calibration mode is also visualized in the `mode` string sent to home assistant.
 The sensor should be left in fresh air until the `calib` string disappears in the mode.
 The calibration time depends on the readout interval.
-For intervals bigger then 1 minute it is 10 times bigger then the configured interval.
+For intervals bigger than 1 minute it is 10 times bigger than the configured interval.
 For smaller intervals it is 10 minutes.
 
 Calibration parameters are stored in the sensor itself and not in the ESP.
