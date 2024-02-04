@@ -42,7 +42,7 @@ bool Scd30::HardwareInitialization(const std::chrono::seconds &readout_interval)
     }
 
     // temperature calibration is done by Sensor::SetCalibration
-    if (device_.setTemperatureOffset(1.2f) == false)
+    if (device_.setTemperatureOffset(1.2f) == false)    // for battery operation: 1.2 / for power supply operation: 2.0
     {
         logger_.LogError("Failed to set temperature offset");
         return false;
