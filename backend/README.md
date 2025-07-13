@@ -1,9 +1,20 @@
 Backend
 =======
 
-Home assistant is used to collect the measured data of the sensors.
-The ansible playbook can install the needed docker containers on any linux system.
+Home Assistant is used to collect the measured data of the sensors.
 
+The easiest and most future prove way is to follow one of the tutorials provided by Home Assistant itself:
+[Home Assistant - Installation](https://www.home-assistant.io/installation/).
+
+
+
+Using Ansible
+-------------
+
+All information below can be used to setup docker and HA by using Ansible.
+But this is only recommended for advanced users!
+
+The ansible playbook can install the needed docker containers on any linux system.
 In addition a `Vagrantfile` is provided that setups a virtualbox VM for development purposes.
 
 
@@ -35,14 +46,14 @@ or use some other way e.g. [github.com/geerlingguy/ansible-role-docker](https://
 You then can clone this repo on your server and run the script `run_local.sh`.
 Or you can include the `homeassistant` role in your own ansible playbook for your server.
 
-Now you can configure home assistant.
+Now you can configure Home Assistant.
 
 
 
 Setup VM for development purposes
 ---------------------------------
 
-The vagrant configuration is ready to be used to setup a complete VM with home assistant.
+The vagrant configuration is ready to be used to setup a complete VM with Home Assistant.
 In addition all ports needed are already forwarded and can be accessed on the local machine.
 
 Install vagrant and virtualbox and start the VM creation with:
@@ -67,19 +78,19 @@ vagrant provision
 vagrant up --provision
 ~~~~~~
 
-Now you can configure home assistant.
+Now you can configure Home Assistant.
 
 
 
-Configure home assistant
+Configure Home Assistant
 ------------------------
 
-You can now configure home assistant
+You can now configure Home Assistant
 after installing the `homeassistant` and `eclipse-mosquitto` (MQTT) container on your server host.
 
 * Login to: `<YOUR_HOMEASSISTANT_IP>:8123` with your web browser.
 * Create a user account.
-* Name your home assistant installation. E.g: `homesensor-backend`. And define your location.
+* Name your Home Assistant installation. E.g: `homesensor-backend`. And define your location.
 * At the next page your asked to select integration services to install. Search and install the `MQTT` integration.
   Use `localhost` for server IP and no user and no password. The port should be kept at the default `1883`.
   Enable the flag for the search function.
@@ -89,15 +100,15 @@ after installing the `homeassistant` and `eclipse-mosquitto` (MQTT) container on
 > You can define credentials but then also need to configure those in the sensors used.
 
 Now you can flash your sensor boards.
-They should automatically appear as device/entity in your home assistant lovelace board.
+They should automatically appear as device/entity in your Home Assistant lovelace board.
 
 
 
-Additional home assistant configuration
+Additional Home Assistant configuration
 ---------------------------------------
 
-As defined in the `docker-compose.yml` the home assistant configuration is mounted to the host file system.
-To configure home assistant manipulate the automatically created `configuration.yaml`.
+As defined in the `docker-compose.yml` the Home Assistant configuration is mounted to the host file system.
+To configure Home Assistant manipulate the automatically created `configuration.yaml`.
 E.g. by changing the history duration from 10 (default) to 28 days:
 
 ~~~~~~
