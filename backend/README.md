@@ -6,6 +6,10 @@ Home Assistant is used to collect the measured data of the sensors.
 The easiest and most future prove way is to follow one of the tutorials provided by Home Assistant itself:
 [Home Assistant - Installation](https://www.home-assistant.io/installation/).
 
+Because the sensor is using MQTT as data protocol
+we need to install the MQTT Integration in Home Assistant: [](https://www.home-assistant.io/integrations/mqtt/).
+If Home Assistant was installed with HA-OS we also need to install the MQTT Broker
+as Home Assistant add-on: [Mosquitto broker](https://github.com/home-assistant/addons/blob/master/mosquitto/DOCS.md)
 
 
 Using Ansible
