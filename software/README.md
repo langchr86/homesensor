@@ -131,7 +131,7 @@ In such cases the readout interval goes directly to maximum of `kMaxReadoutInter
 This is also helpfull to notify the user about low power
 because the sensor data will become sparse.
 That behavior is triggered because of the maximum readout interval is much longer
-then the expiration time of individual sensor data in home assistant.
+than the expiration time of individual sensor data in home assistant.
 
 
 
