@@ -30,7 +30,7 @@ Things that almost always need to be adapted to the specific environment are:
 * Wifi credentials
 * Home assistant IP
 * Network gateway/mask
-* MQTT credentials and port (can be left as is if the default was used at setup of home assistant)
+* MQTT credentials and port (can be left as is if the default empty fields were used at setup of home assistant)
 
 **Ensure that you never push commits to remotes that contain your private credentials!**
 
