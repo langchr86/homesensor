@@ -10,6 +10,7 @@ Bill of Material
 * Sensirion SCD30: [1649-1098-ND](https://www.digikey.ch/product-detail/de/sensirion-ag/SCD30/1649-1098-ND/8445334)
 * 18650 Battery holder: [BH-18650-PC-ND](https://www.digikey.ch/product-detail/de/mpd-memory-protection-devices/BH-18650-PC/BH-18650-PC-ND/3029216)
 * JST 2pin power connector: [1528-1126-ND](https://www.digikey.ch/product-detail/de/adafruit-industries-llc/261/1528-1126-ND/5353586)
+* 5W USB-Micro power supply: [VFL05US050-EU-UB](https://www.digikey.ch/de/products/detail/xp-power/VFL05US050-EU-UB/25320746?s=N4IgTCBcDaIGoDEAyAGArAVQMrpQWgFEM8MAhEAXQF8g)
 
 
 
